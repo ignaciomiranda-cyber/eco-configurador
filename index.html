@@ -258,7 +258,7 @@
 </head>
 <body>
 
-<div class="draft-note">Borrador. Paleta Pintecord (Sherwin Williams + Alba) reemplaza a "Pintura Sherwin Williams". Colores confirmados con render real: Rojo, Azul, Violeta, Negro (Sherwin Williams en estructura/esfera/asiento y Epoxy laqueado en estructura/asiento metal). Alba usa provisoriamente los mismos 4 colores que Sherwin Williams, sin render propio (cae al render en blanco). El resto de la paleta Sherwin Williams (hasta 10) y varios precios nuevos siguen pendientes.</div>
+
 
 <div class="topbar">Envíos a todo el país · Producción a medida · Consultá por WhatsApp</div>
 
@@ -347,7 +347,7 @@
     <div class="summary">
       <div class="summary-line"><span>Precio base</span><span id="baseLine">$159.000</span></div>
       <div class="summary-line" id="adicLine" style="display:none;"><span>Adicionales</span><span id="adicValue">$0</span></div>
-      <div class="summary-total">
+      <div class="summary-line"><span>IVA (21%)</span><span id="ivaValue">$0</span></div><div class="summary-total">
         <span class="label">Total estimado</span>
         <span class="value" id="totalValue">$299.000</span>
       </div>
@@ -358,7 +358,7 @@
   </div>
 </div>
 
-<footer>Mil9.Estudio — Córdoba, Argentina — mockup de configurador, no es el sitio final</footer>
+<footer>Este es un producto registrado de MilDesing SAS. Todos los derechos reservados.</footer>
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-card">
@@ -762,8 +762,8 @@ function recalc(){
   document.querySelectorAll('.swatch.selected').forEach(el=>{
     adic += parseInt(el.dataset.price || "0", 10);
   });
-  const total = BASE + adic;
-  document.getElementById("baseLine").textContent = fmt(BASE);
+  const subtotal = BASE + adic; const iva = Math.round(subtotal * 0.21); const total = subtotal + iva;
+  document.getElementById("baseLine").textContent = fmt(BASE); document.getElementById("ivaValue").textContent = fmt(iva);
   document.getElementById("totalValue").textContent = fmt(total);
   const adicLine = document.getElementById("adicLine");
   if (adic > 0){
