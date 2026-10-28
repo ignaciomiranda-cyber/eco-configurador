@@ -394,10 +394,7 @@
 <script>
 const IMGDATA = null; /*EMBED*/
 // Renders de terrazzo: se usan con el nombre de archivo original
-const IMG_ALIAS = {
-  "esfera-terrazzo-ansenuza": "Esferas - Terrazzo Ansenuza.105", "esfera-terrazzo-iguazu": "Esferas - Terrazzo iguazú.104",
-  "asiento-terrazzo-ansenuza": "Asiento - Terrazzo ansenuza.102", "asiento-terrazzo-iguazu": "Asiento - Terrazzo iguazú.103"
-};
+const IMG_ALIAS = {};
 const FILE = n => IMG_ALIAS[n] ? encodeURIComponent(IMG_ALIAS[n]) : n;
 const IMG = n => IMGDATA ? IMGDATA[n] : FILE(n) + (n.startsWith("thumb-") ? ".jpg" : ".png");
 
@@ -460,9 +457,8 @@ const ASI_OPTS = {
   ],
   Tapizado: [
     {n:"Felpa", p:90000, bg:"#8a7863", sub:"felpa"},
-    {n:"Pana", p:80000, bg:"repeating-linear-gradient(90deg,#efece6,#efece6 2px,#e2ded6 2px,#e2ded6 4px)", img:"asiento-tapizado-pana"},
-    {n:"Pana bouclé", p:80000, bg:"radial-gradient(circle at 30% 30%,#fbf9f4 0 3px,transparent 4px) 0 0/9px 9px,radial-gradient(circle at 70% 65%,#e9e4d9 0 3px,transparent 4px) 0 0/9px 9px,#f3efe6", img:"asiento-tapizado-pana"},
-    {n:"Otras panas", p:80000, bg:"conic-gradient(#af2734,#ff9800,#fedf00,#72b896,#0061a9,#9079af,#af2734)", sub:"otro"}
+    {n:"Pana", p:80000, bg:"repeating-linear-gradient(90deg,#efece6,#efece6 2px,#e2ded6 2px,#e2ded6 4px)", sub:"color"},
+    {n:"Pana bouclé", p:80000, bg:"radial-gradient(circle at 30% 30%,#fbf9f4 0 3px,transparent 4px) 0 0/9px 9px,radial-gradient(circle at 70% 65%,#e9e4d9 0 3px,transparent 4px) 0 0/9px 9px,#f3efe6", sub:"color"}
   ]
 };
 // Asiento de metal: va soldado a la estructura, mismo acabado. Precio según el acabado de la estructura.
@@ -497,7 +493,7 @@ function normalize(){
   const s = esfOpt(); if (s && s.paint && !state.esf.color) state.esf.color = "Blanco";
   if (e.paint === "epoxy" && !colorByName(EPOXY, state.est.color)) state.est.color = "Blanco";
   if (s && s.paint === "epoxy" && !colorByName(EPOXY, state.esf.color)) state.esf.color = "Blanco";
-  if (state.asi.fam === "Tapizado" && state.asi.opt === "Otras panas" && !state.asi.color) state.asi.color = "Blanco";
+  if (state.asi.fam === "Tapizado" && (state.asi.opt === "Pana" || state.asi.opt === "Pana bouclé") && !state.asi.color) state.asi.color = "Blanco";
   // Epoxy: solo blanco y negro existen en mate y brillante; los demás colores son satinados.
   [["est", estOpt()], ["esf", esfOpt()]].forEach(([k, o]) => {
     if (!o || !o.paint) return;
@@ -537,8 +533,7 @@ function describeAsi(){
   if (state.asi.fam === "Madera") return "Madera " + o.n;
   if (state.asi.fam === "Terrazzo") return "Terrazzo " + o.n;
   if (o.n === "Felpa") return "Tapizado Felpa® · " + state.asi.felpa;
-  if (o.n === "Otras panas") return "Tapizado · otras panas · color " + state.asi.color;
-  return "Tapizado " + o.n;
+  return "Tapizado " + o.n + " · color " + state.asi.color;
 }
 
 /* ---------- render del preview ---------- */
@@ -586,7 +581,7 @@ function asiLayer(){
   const o = asiOpt();
   if (o.img) return [o.img, null];
   if (o.n === "Felpa") return ["asiento-tapizado-felpa-" + FELPAS.find(f => f.n === state.asi.felpa).f, null];
-  return ["asiento-tapizado-pana", hexOf(allColors(), state.asi.color)];  // "Otras panas": pana blanca teñida
+  return [o.n === "Pana bouclé" ? "asiento-tapizado-pana-boucle" : "asiento-tapizado-pana", hexOf(allColors(), state.asi.color)];  // pana teñida
 }
 let drawToken = 0;
 const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -722,7 +717,7 @@ function buildAsiento(){
     const r = row();
     FELPAS.forEach(f => r.appendChild(swatchCell(null, f.n, state.asi.felpa === f.n, () => { state.asi.felpa = f.n; }, {thumb: IMG("thumb-felpa-" + f.f)})));
     p.appendChild(r); body.appendChild(p);
-  } else if (o.sub === "otro"){
+  } else if (o.sub === "color"){
     const p = subPanel(); p.appendChild(label("Color de la tela"));
     const r = row();
     LAQUEADA.forEach(c => r.appendChild(swatchCell(c[1], c[0], state.asi.color === c[0], () => { state.asi.color = c[0]; })));
