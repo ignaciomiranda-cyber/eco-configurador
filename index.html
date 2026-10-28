@@ -886,9 +886,9 @@ document.getElementById("ackBox").addEventListener("change", e => {
 });
 function confirmSend(){
   if (!document.getElementById("ackBox").checked) return;
-  const msg = "Hola! Armé esta config de la Silla Eco (edición limitada de 20 unidades):\n- Estructura: " + describeEst() +
-    "\n- Esfera: " + describeEsf() + "\n- Asiento: " + describeAsi() +
-    "\n- Total estimado: " + document.getElementById("totalValue").dataset.val + "\nEntiendo que es un producto único y un experimento, y estamos felices de que así sea. Quisiera ver fotos reales de las muestras.\nQuiero confirmar el pedido.";
+  const msg = "Buenos días! Armé esta configuración de ECO.\nEstructura: " + describeEst() +
+    "\nEsfera: " + describeEsf() + "\nAsiento: " + describeAsi() +
+    "\nTotal estimado: " + document.getElementById("totalValue").dataset.val + "\nCómo seguimos?";
   window.open("https://wa.me/5493518756998?text=" + encodeURIComponent(msg), "_blank");
   closeConfirm();
 }
