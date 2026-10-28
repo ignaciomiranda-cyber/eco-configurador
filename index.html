@@ -325,6 +325,7 @@
 <div class="hero-title">
   <h1>Configurá tu Silla Eco</h1>
   <p>Cada Eco es única, tu proyecto hecho silla. <span class="stock-pill">Edición limitada de 20 unidades</span></p>
+  <p class="craft">Todo se resuelve acá, en Córdoba: diseño, fabricación y terminaciones.</p>
 </div>
 
 <div class="configurator">
@@ -703,6 +704,7 @@ function buildEstructura(){
   }));
   const o = estOpt();
   if (o.paint){ const p = subPanel(); colorRows(p, state.est, o); body.appendChild(p); }
+  body.appendChild(note("59 colores en pintura laqueada, 16 en epoxy, y además crudo, cromado y tornasolado."));
 }
 function buildEsfera(){
   const body = document.getElementById("body-esfera"); body.innerHTML = "";
