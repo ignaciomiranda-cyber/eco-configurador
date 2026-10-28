@@ -559,8 +559,8 @@ function zebraPattern(w, h){
     const top = [], bot = [];
     for (let k = 0; k <= 56; k++){
       const t = k / 56, y = t * h * 1.25 - 120;
-      const off = i * 92 + y * 0.5 + Math.sin(t * 8 + i * 1.7) * 30 + Math.sin(t * 21 + i) * 9;
-      const th = 30 + 17 * Math.sin(t * 6 + i * 2.3) + 10 * Math.sin(t * 15 + i * .7);
+      const off = i * 84 + y * 0.5 + Math.sin(t * 8) * 16;
+      const th = 38 + 3 * Math.sin(t * 7);
       top.push([off - th / 2, y]); bot.push([off + th / 2, y]);
     }
     x.beginPath(); x.moveTo(top[0][0], top[0][1]);
