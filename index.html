@@ -261,6 +261,7 @@
   .step-header{padding:30px 0 !important;}
   .preview{background:#ffffff !important; box-shadow:none !important;}
   @media (max-width:480px){.step-label{font-size:19px !important;}}
+  .hero-title h1,.step-label{color:var(--title,#232226) !important; transition:color .5s ease;}
 </style>
 </head>
 <body>
@@ -663,7 +664,20 @@ function update(){
   const al = document.getElementById("adicLine");
   if (pb.adic > 0){ al.style.display = "flex"; document.getElementById("adicValue").textContent = "+" + fmt(pb.adic); } else al.style.display = "none";
   document.getElementById("previewCaption").textContent = describeEst() + " · Esfera " + describeEsf() + " · Asiento " + describeAsi();
+  applyTitleColor();
   drawPreview();
+}
+// Los títulos toman el color elegido (si es muy claro se oscurece para que se lea).
+function applyTitleColor(){
+  const hex = (!pageJustOpened && estOpt().paint) ? hexOf(allColors(), state.est.color) : null;
+  let c = "#232226";
+  if (hex){
+    const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    const dk = lum > 0.45 ? Math.min(0.7, lum - 0.2) : 0;
+    c = lum > 0.93 ? "#232226" : "rgb(" + [r, g, b].map(v => Math.round(v * (1 - dk) + 30 * dk)).join(",") + ")";
+  }
+  document.documentElement.style.setProperty("--title", c);
 }
 
 /* ---------- presets ---------- */
