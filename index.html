@@ -414,6 +414,7 @@ const FILE = n => IMG_ALIAS[n] ? encodeURIComponent(IMG_ALIAS[n]) : n;
 const IMG = n => IMGDATA ? IMGDATA[n] : FILE(n) + (n.startsWith("thumb-") ? ".jpg" : ".png");
 
 let mixKey = "";
+const isMix = () => !!mixKey && configKey() === mixKey;   // "Se me ocurre otra cosa": todo queda sin definir (∞)
 const BASE = 159000;
 const IVA = 0.21;
 
@@ -532,17 +533,20 @@ function priceBreakdown(){
 }
 
 function describeEst(){
+  if (isMix()) return "∞";
   const o = estOpt();
   if (!o.paint) return o.n;
   return o.n + " · " + cn(state.est.color) + (state.est.color === "Arte" ? "" : " · " + state.est.finish.toLowerCase());
 }
 function describeEsf(){
+  if (isMix()) return "∞";
   const o = esfOpt();
   if (o.same) return "Igual que estructura (madera laqueada · " + cn(state.est.color) + (state.est.color === "Arte" ? "" : ", " + state.est.finish.toLowerCase()) + ")";
   if (!o.paint) return state.esf.fam + " " + o.n;
   return state.esf.fam + " " + o.n + " · " + state.esf.color + " · " + state.esf.finish.toLowerCase();
 }
 function describeAsi(){
+  if (isMix()) return "∞";
   if (state.asi.fam === "Metal"){
     const o = estOpt();
     return "Metal · igual a la estructura" + (o.paint ? " (" + o.n + " " + cn(state.est.color) + (state.est.color === "Arte" ? "" : ", " + state.est.finish.toLowerCase()) + ")" : " (" + o.n + ")");
@@ -762,7 +766,7 @@ function update(){
   setOdo(document.getElementById("totalValue"), mix ? "∞" : fmt(sub + iva));
   const al = document.getElementById("adicLine");
   if (pb.adic > 0){ al.style.display = "flex"; document.getElementById("adicValue").textContent = mix ? "+∞" : "+" + fmt(pb.adic); } else al.style.display = "none";
-  document.getElementById("previewCaption").textContent = describeEst() + " · Esfera " + describeEsf() + " · Asiento " + describeAsi();
+  document.getElementById("previewCaption").textContent = (isMix() ? "Estructura " : "") + describeEst() + " · Esfera " + describeEsf() + " · Asiento " + describeAsi();
   applyTitleColor();
   drawPreview();
 }
@@ -791,7 +795,7 @@ function setOdo(el, str){
     st.style.transform = "translateY(-" + (+ch * 1.15) + "em)";
   });
 }
-function configKey(){ return [describeEst(), describeEsf(), describeAsi()].join("|"); }
+function configKey(){ return JSON.stringify([state.est, state.esf, state.asi]); }
 // Ola de color: el fondo nuevo se expande en círculo desde el punto donde se hizo click.
 let lastClick = null, prevWash = [255, 255, 255], waveRaf = 0;
 document.addEventListener("click", e => { lastClick = {x: e.pageX, y: e.pageY, t: Date.now()}; }, true);
