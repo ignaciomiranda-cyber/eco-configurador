@@ -315,7 +315,7 @@
 
 <div class="hero-title">
   <h1>Configurá tu Silla Eco</h1>
-  <p>Cada Eco es única, tu proyecto hecho silla. <span class="stock-pill">Edición limitada de 30 unidades</span></p>
+  <p>Cada Eco es única, tu proyecto hecho silla. <span class="stock-pill">Edición limitada de 20 unidades</span></p>
 </div>
 
 <div class="configurator">
@@ -365,7 +365,7 @@
       </div>
       <button class="cta" type="button" id="ctaBtn">Enviar configuración por WhatsApp</button>
       <div class="fine-print"><strong>Imágenes aproximadas.</strong> Los colores y acabados que ves en pantalla son una referencia: pueden diferir del producto real. Te recomendamos pedir fotos reales de las muestras antes de decidir.</div>
-      <div class="fine-print"><strong>Producto único.</strong> Cada Eco se fabrica a pedido y es personalizada, por eso puede tener variaciones respecto de lo que ves acá. Edición limitada a 30 unidades: al confirmar tu pedido se te asigna el número de producto (n.º / 30). Si se agotan, se agotan.</div>
+      <div class="fine-print"><strong>Producto único.</strong> Cada Eco se fabrica a pedido y es personalizada, por eso puede tener variaciones respecto de lo que ves acá. Edición limitada a 20 unidades: al confirmar tu pedido se te asigna el número de producto (n.º / 20). Si se agotan, se agotan.</div>
       <div class="fine-print">Precio final con IVA incluido. Producción a medida, 30 días aprox. Los colores se confirman por WhatsApp antes de producir y los colores especiales están sujetos a disponibilidad.</div>
     </div>
 
@@ -869,7 +869,7 @@ document.querySelectorAll('.step-header').forEach(h => h.addEventListener('click
 /* ---------- confirmación / WhatsApp ---------- */
 function openConfirm(){
   document.getElementById("modalLines").innerHTML =
-    '<div class="row"><span>Edición</span><strong>Limitada a 30 unidades (el número se asigna al confirmar)</strong></div>' +
+    '<div class="row"><span>Edición</span><strong>Limitada a 20 unidades (el número se asigna al confirmar)</strong></div>' +
     '<div class="row"><span>Estructura</span><strong>' + describeEst() + '</strong></div>' +
     '<div class="row"><span>Esfera</span><strong>' + describeEsf() + '</strong></div>' +
     '<div class="row"><span>Asiento</span><strong>' + describeAsi() + '</strong></div>';
@@ -885,7 +885,7 @@ document.getElementById("ackBox").addEventListener("change", e => {
 });
 function confirmSend(){
   if (!document.getElementById("ackBox").checked) return;
-  const msg = "Hola! Armé esta config de la Silla Eco (edición limitada de 30 unidades):\n- Estructura: " + describeEst() +
+  const msg = "Hola! Armé esta config de la Silla Eco (edición limitada de 20 unidades):\n- Estructura: " + describeEst() +
     "\n- Esfera: " + describeEsf() + "\n- Asiento: " + describeAsi() +
     "\n- Total estimado: " + document.getElementById("totalValue").dataset.val + "\nEntiendo que es un producto único y un experimento, y estamos felices de que así sea. Quisiera ver fotos reales de las muestras.\nQuiero confirmar el pedido.";
   window.open("https://wa.me/5493518756998?text=" + encodeURIComponent(msg), "_blank");
