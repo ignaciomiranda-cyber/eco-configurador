@@ -267,10 +267,7 @@
   html{background:var(--wash) !important;}
   body{background:transparent !important;}
   #sphereWrap{position:absolute; inset:0; pointer-events:none;}
-  #sphereCanvas{position:absolute; inset:0; width:100%; height:100%; transform-origin:59.2% 23.5%; animation:eco-sway 5.5s ease-in-out infinite;}
-  @keyframes eco-sway{0%,100%{transform:rotate(-4.5deg) translateY(0);} 50%{transform:rotate(4.5deg) translateY(-.4%);}}
-  #sphereWrap.drop{animation:eco-drop .95s cubic-bezier(.3,0,.3,1);}
-  @keyframes eco-drop{0%{transform:translateY(-7%);} 42%{transform:translateY(0);} 58%{transform:translateY(-1.8%);} 76%{transform:translateY(0);} 88%{transform:translateY(-.6%);} 100%{transform:translateY(0);}}
+  #sphereCanvas{position:absolute; inset:0; width:100%; height:100%;}
   .chair-tag{position:absolute; top:24px; left:28px; max-width:170px; z-index:2; pointer-events:none;}
   .chair-name{font-family:"Outfit",sans-serif; font-size:20px; font-weight:600; letter-spacing:-.01em; line-height:1.15; color:var(--title);}
   .chair-code{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin-top:6px;}
@@ -280,7 +277,7 @@
   .odo-strip{display:block; transition:transform .9s cubic-bezier(.2,.9,.25,1);}
   .odo-strip i{display:block; height:1.15em; line-height:1.15em; font-style:normal;}
   .odo-sep{display:inline-block; height:1.15em;}
-  @media (prefers-reduced-motion:reduce){#sphereCanvas,#sphereWrap.drop{animation:none;} .odo-strip{transition:none;}}
+  @media (prefers-reduced-motion:reduce){.odo-strip{transition:none;}}
   .hero-title h1,.step-label{color:var(--title) !important;}
   .configurator,.panel,.step,.presets,footer{border-color:rgba(35,34,38,.14);}
   .preset-btn{background:rgba(255,255,255,.55);}
@@ -322,7 +319,7 @@
 <div class="configurator">
   <div class="preview">
     <div class="preview-imgwrap"><canvas id="previewCanvas" width="1280" height="1280"></canvas><div id="sphereWrap"><canvas id="sphereCanvas" width="1280" height="1280"></canvas></div><canvas id="prevCanvas" width="1280" height="1280" style="pointer-events:none; opacity:0;"></canvas></div>
-    <div class="chair-tag"><div class="chair-name" id="chairName"></div><div class="chair-code" id="chairCode"></div></div>
+    <div class="chair-tag"><div class="chair-name">Edición limitada</div><div class="chair-code">Solo 30 unidades</div></div>
     <div class="preview-caption" id="previewCaption"></div>
   </div>
 
@@ -367,7 +364,7 @@
       </div>
       <button class="cta" type="button" id="ctaBtn">Enviar configuración por WhatsApp</button>
       <div class="fine-print"><strong>Imágenes aproximadas.</strong> Los colores y acabados que ves en pantalla son una referencia: pueden diferir del producto real. Te recomendamos pedir fotos reales de las muestras antes de decidir.</div>
-      <div class="fine-print"><strong>Producto único.</strong> Cada Eco se fabrica a pedido y es personalizada, por eso puede tener variaciones respecto de lo que ves acá. El nombre y el número de configuración identifican tu combinación; no son una edición numerada.</div>
+      <div class="fine-print"><strong>Producto único.</strong> Cada Eco se fabrica a pedido y es personalizada, por eso puede tener variaciones respecto de lo que ves acá. Edición limitada a 30 unidades: al confirmar tu pedido se te asigna el número de producto (n.º / 30). Si se agotan, se agotan.</div>
       <div class="fine-print">Precio final con IVA incluido. Producción a medida, 30 días aprox. Los colores se confirman por WhatsApp antes de producir y los colores especiales están sujetos a disponibilidad.</div>
     </div>
 
@@ -572,7 +569,7 @@ function asiLayer(){
   if (o.n === "Felpa") return ["asiento-tapizado-felpa-" + FELPAS.find(f => f.n === state.asi.felpa).f, null];
   return ["asiento-tapizado-pana", hexOf(allColors(), state.asi.color)];  // "Otras panas": pana blanca teñida
 }
-let drawToken = 0, lastSphereKey = "";
+let drawToken = 0;
 const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 async function drawPreview(){
   const token = ++drawToken;
@@ -597,11 +594,6 @@ async function drawPreview(){
     x.drawImage(imgs[3], 0, 0, W, H);
     void pv.offsetWidth;
     pv.style.transition = "opacity .45s ease"; pv.style.opacity = "0";
-    const sk = specs[1].join("|");
-    if (lastSphereKey && sk !== lastSphereKey && !REDUCED){
-      const sw = document.getElementById("sphereWrap"); sw.classList.remove("drop"); void sw.offsetWidth; sw.classList.add("drop");
-    }
-    lastSphereKey = sk;
   }catch(err){ console.error("No se pudo cargar el render:", err.message); }
 }
 
@@ -737,9 +729,6 @@ function update(){
   const al = document.getElementById("adicLine");
   if (pb.adic > 0){ al.style.display = "flex"; document.getElementById("adicValue").textContent = "+" + fmt(pb.adic); } else al.style.display = "none";
   document.getElementById("previewCaption").textContent = describeEst() + " · Esfera " + describeEsf() + " · Asiento " + describeAsi();
-  const id = chairIdentity();
-  showName(id.name);
-  document.getElementById("chairCode").textContent = "Configuración nº " + id.code;
   applyTitleColor();
   drawPreview();
 }
@@ -768,28 +757,7 @@ function setOdo(el, str){
     st.style.transform = "translateY(-" + (+ch * 1.15) + "em)";
   });
 }
-const ADJ = ["Fugaz", "Atrevida", "Serena", "Traviesa", "Radiante", "Cómplice", "Sutil", "Rotunda", "Ligera", "Tenaz", "Dulce", "Insolente"];
-function hashStr(s){ let h = 2166136261; for (let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 function configKey(){ return [describeEst(), describeEsf(), describeAsi()].join("|"); }
-function chairIdentity(){
-  const h = hashStr(configKey()), e = estOpt();
-  const core = e.paint ? state.est.color : (e.n === "Cromado" ? "Cromo" : e.n === "Tornasolado" ? "Tornasol" : "Crudo");
-  return {name: "Eco " + core + " " + ADJ[h % ADJ.length], code: String(h % 10000).padStart(4, "0")};
-}
-let lastName = "", scrambleRaf = 0;
-function showName(txt){
-  const el = document.getElementById("chairName");
-  if (txt === lastName) return; lastName = txt;
-  cancelAnimationFrame(scrambleRaf);
-  if (REDUCED){ el.textContent = txt; return; }
-  const t0 = performance.now(), D = 450, abc = "ABCDEFGHIJLMNOPRSTUVXZ";
-  const step = now => {
-    const k = Math.min(1, (now - t0) / D), n = Math.floor(k * txt.length);
-    el.textContent = k >= 1 ? txt : txt.slice(0, n) + [...txt.slice(n)].map(c => c === " " ? " " : abc[Math.random() * abc.length | 0]).join("");
-    if (k < 1) scrambleRaf = requestAnimationFrame(step);
-  };
-  scrambleRaf = requestAnimationFrame(step);
-}
 // Ola de color: el fondo nuevo se expande en círculo desde el punto donde se hizo click.
 let lastClick = null, prevWash = [255, 255, 255], waveRaf = 0;
 document.addEventListener("click", e => { lastClick = {x: e.pageX, y: e.pageY, t: Date.now()}; }, true);
@@ -885,7 +853,7 @@ document.querySelectorAll('.step-header').forEach(h => h.addEventListener('click
 /* ---------- confirmación / WhatsApp ---------- */
 function openConfirm(){
   document.getElementById("modalLines").innerHTML =
-    '<div class="row"><span>Nombre</span><strong>' + chairIdentity().name + ' · nº ' + chairIdentity().code + '</strong></div>' +
+    '<div class="row"><span>Edición</span><strong>Limitada a 30 unidades (el número se asigna al confirmar)</strong></div>' +
     '<div class="row"><span>Estructura</span><strong>' + describeEst() + '</strong></div>' +
     '<div class="row"><span>Esfera</span><strong>' + describeEsf() + '</strong></div>' +
     '<div class="row"><span>Asiento</span><strong>' + describeAsi() + '</strong></div>';
@@ -901,8 +869,7 @@ document.getElementById("ackBox").addEventListener("change", e => {
 });
 function confirmSend(){
   if (!document.getElementById("ackBox").checked) return;
-  const id = chairIdentity();
-  const msg = "Hola! Armé esta config de la Silla Eco (" + id.name + ", configuración nº " + id.code + "):\n- Estructura: " + describeEst() +
+  const msg = "Hola! Armé esta config de la Silla Eco (edición limitada de 30 unidades):\n- Estructura: " + describeEst() +
     "\n- Esfera: " + describeEsf() + "\n- Asiento: " + describeAsi() +
     "\n- Total estimado: " + document.getElementById("totalValue").dataset.val + "\nEntiendo que es un producto único y un experimento, y estamos felices de que así sea. Quisiera ver fotos reales de las muestras.\nQuiero confirmar el pedido.";
   window.open("https://wa.me/5493518756998?text=" + encodeURIComponent(msg), "_blank");
