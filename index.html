@@ -386,7 +386,9 @@ const IVA = 0.21;
 const LAQUEADA = [["Blanco", "#ffffff"], ["Negro", "#101921"], ["Gris Viento", "#d0ced5"], ["Gris Piedra", "#7e7e89"], ["Gris Tormenta", "#545860"], ["Aluminio", "#a4a3a1"], ["Amarillo", "#fedf00"], ["Naranja", "#ff9800"], ["Rojo", "#af2734"], ["Magenta", "#af2579"], ["Violeta", "#9079af"], ["Azul", "#0061a9"], ["Verde", "#72b896"], ["Verde Lima", "#e0ec92"], ["Amarillo Sereno", "#f0c177"], ["Salmón", "#ff8680"], ["Rosa Suave", "#ff9ca1"], ["Rosa Intenso", "#c84e6b"], ["Uva", "#7e496b"], ["Azul Oscuro", "#1b256e"], ["Azul Adriático", "#00426d"], ["Celeste Cielo", "#8bb8f8"], ["Turquesa", "#5cb8c0"], ["Verde Impulso", "#aac689"], ["Marfil Seda", "#f5e1ad"], ["Beige Arena", "#cda991"], ["Beige Avellana", "#b3a097"], ["Tostado", "#9a8067"], ["Marrón Oscuro", "#47372a"], ["Celeste", "#44b8f3"]];
 const ESPECIALES = [["Gris Techos", "#63666f"], ["Verde Calma", "#a3adb4"], ["Vainilla Suave", "#e0d3b4"], ["Beige Trigo", "#d8c5c4"], ["Piedra París", "#beb1a8"], ["Beige", "#ac967e"], ["Beige Tostado", "#c1b2ad"], ["Beige Sutil", "#d8d4d7"], ["Beige Primer", "#e6d397"], ["Marfil Champagne", "#ddcdae"], ["Natural", "#eaa047"], ["Rojo Bermellón", "#a72a2e"], ["Rojo", "#e72f4d"], ["Amarillo Mediano", "#ffac00"], ["Amarillo Cálido", "#ffc94f"], ["Amarillo Vial", "#ffd500"], ["Amarillo Verdoso", "#e5ff24"], ["Oro", "#8a6e46"], ["Oro Azteca", "#ba9863"], ["Traful", "#007ec3"], ["Azul Traful", "#00497a"], ["Azul Capri", "#61787e"], ["Azul Cielo", "#537b90"], ["Azul Inmenso", "#6191bb"], ["Azulejo", "#005782"], ["Azul Ancestral", "#4e83ae"], ["Azul Cobalto", "#313a4b"], ["Verde Agua", "#b1e4f1"], ["Amarillo Flúo", "#ffe900"]];
 const EPOXY_NAMES = ["Blanco", "Negro", "Gris Piedra", "Amarillo", "Naranja", "Rojo", "Magenta", "Violeta", "Azul", "Celeste", "Turquesa", "Verde", "Verde Lima", "Azul Oscuro", "Tostado"];
-const EPOXY = LAQUEADA.filter(c => EPOXY_NAMES.includes(c[0]));
+// Terracota: color extra solo para Epoxy (hex tomado del rojo ladrillo de la paleta, referencial)
+const EPOXY_EXTRA = [["Terracota", "#a5544a"]];
+const EPOXY = LAQUEADA.filter(c => EPOXY_NAMES.includes(c[0])).concat(EPOXY_EXTRA);
 const FELPAS = [
   {n:"Sunset", f:"sunset"}, {n:"Sunset II", f:"sunset-ii"}, {n:"La Musique", f:"la-musique"}, {n:"Ser B&N", f:"ser-byn"}
 ];
@@ -461,7 +463,7 @@ function normalize(){
   if (s && s.paint === "epoxy" && !colorByName(EPOXY, state.esf.color)) state.esf.color = "Blanco";
   if (state.asi.fam === "Tapizado" && state.asi.opt === "Otro" && !state.asi.color) state.asi.color = "Blanco";
 }
-function allColors(){ return LAQUEADA.concat(ESPECIALES); }
+function allColors(){ return LAQUEADA.concat(ESPECIALES, EPOXY_EXTRA); }
 function hexOf(list, name){ const c = colorByName(list, name); return c ? c[1] : null; }
 
 function priceBreakdown(){
@@ -728,6 +730,7 @@ function applyTitleColor(){
 /* ---------- presets ---------- */
 const PRESETS = [
   {label:"Full color", set:() => { state.est = {opt:"Pintura laqueada", color:"Rojo", finish:"Mate"}; state.esf = {same:true, fam:"Madera", opt:"Guatambú", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
+  {label:"Tenis", set:() => { state.est = {opt:"Epoxy", color:"Terracota", finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
   {label:"Full crudo", set:() => { state.est = {opt:"Crudo", color:null, finish:"Mate"}; state.esf = {fam:"Metal", opt:"Crudo", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
   {label:"Full cromo", set:() => { state.est = {opt:"Cromado", color:null, finish:"Mate"}; state.esf = {fam:"Metal", opt:"Cromado", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
   {label:"Cromo y roble", set:() => { state.est = {opt:"Cromado", color:null, finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Madera", opt:"Roble", felpa:"Sunset", color:null}; }},
