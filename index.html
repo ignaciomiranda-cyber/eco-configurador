@@ -388,6 +388,7 @@ const ESPECIALES = [["Gris Techos", "#63666f"], ["Verde Calma", "#a3adb4"], ["Va
 const EPOXY_NAMES = ["Blanco", "Negro", "Gris Piedra", "Amarillo", "Naranja", "Rojo", "Magenta", "Violeta", "Azul", "Celeste", "Turquesa", "Verde", "Verde Lima", "Azul Oscuro", "Tostado"];
 // Terracota: color extra solo para Epoxy (hex tomado del rojo ladrillo de la paleta, referencial)
 const EPOXY_EXTRA = [["Terracota", "#a5544a"]];
+const EPOXY_BIFINISH = ["Blanco", "Negro"];
 const EPOXY = LAQUEADA.filter(c => EPOXY_NAMES.includes(c[0])).concat(EPOXY_EXTRA);
 const FELPAS = [
   {n:"Sunset", f:"sunset"}, {n:"Sunset II", f:"sunset-ii"}, {n:"La Musique", f:"la-musique"}, {n:"Ser B&N", f:"ser-byn"}
@@ -441,6 +442,7 @@ const state = {
 };
 let pageJustOpened = true;
 
+const disp = t => String(t).replace(/Felpa(?!®)/g, "Felpa®");
 function fmt(n){ return "$" + Math.round(n).toLocaleString("es-AR"); }
 const colorByName = (list, n) => list.find(c => c[0] === n);
 
@@ -462,6 +464,13 @@ function normalize(){
   if (e.paint === "epoxy" && !colorByName(EPOXY, state.est.color)) state.est.color = "Blanco";
   if (s && s.paint === "epoxy" && !colorByName(EPOXY, state.esf.color)) state.esf.color = "Blanco";
   if (state.asi.fam === "Tapizado" && state.asi.opt === "Otro" && !state.asi.color) state.asi.color = "Blanco";
+  // Epoxy: solo blanco y negro existen en mate y brillante; los demás colores son satinados.
+  [["est", estOpt()], ["esf", esfOpt()]].forEach(([k, o]) => {
+    if (!o || !o.paint) return;
+    const pc = state[k];
+    if (o.paint === "epoxy") pc.finish = EPOXY_BIFINISH.includes(pc.color) ? (pc.finish === "Satinado" ? "Mate" : pc.finish) : "Satinado";
+    else if (pc.finish === "Satinado") pc.finish = "Mate";
+  });
 }
 function allColors(){ return LAQUEADA.concat(ESPECIALES, EPOXY_EXTRA); }
 function hexOf(list, name){ const c = colorByName(list, name); return c ? c[1] : null; }
@@ -492,7 +501,7 @@ function describeAsi(){
   }
   const o = asiOpt();
   if (state.asi.fam === "Madera") return "Madera " + o.n;
-  if (o.n === "Felpa") return "Tapizado Felpa · " + state.asi.felpa;
+  if (o.n === "Felpa") return "Tapizado Felpa® · " + state.asi.felpa;
   if (o.n === "Otro") return "Tapizado Pana · color " + state.asi.color;
   return "Tapizado " + o.n;
 }
@@ -573,9 +582,9 @@ function swatchCell(bg, label, selected, onclick, opts){
   b.className = "swatch" + (selected ? " selected" : "");
   if (opts.thumb){ b.style.backgroundImage = "url(" + opts.thumb + ")"; b.style.backgroundSize = "cover"; b.style.backgroundPosition = "center"; }
   else b.style.background = bg;
-  b.title = label;
+  b.title = disp(label);
   b.addEventListener("click", e => { if (e.isTrusted) pageJustOpened = false; onclick(); update(); });
-  const l = document.createElement("span"); l.className = "swatch-label"; l.textContent = label;
+  const l = document.createElement("span"); l.className = "swatch-label"; l.textContent = disp(label);
   cell.appendChild(b); cell.appendChild(l); return cell;
 }
 function row(){ const r = document.createElement("div"); r.className = "swatches"; return r; }
@@ -603,12 +612,14 @@ function syncFromEst(){
 function colorRows(wrap, piece, o){
   // piece: objeto de estado con .color y .finish
   wrap.appendChild(label("Acabado"));
-  wrap.appendChild(toggle(["Mate", "Brillante"], piece.finish, n => { piece.finish = n; if (piece === state.est) syncFromEst(); }));
+  if (o.paint === "epoxy" && !EPOXY_BIFINISH.includes(piece.color)) wrap.appendChild(toggle(["Satinado"], "Satinado", () => {}));
+  else wrap.appendChild(toggle(["Mate", "Brillante"], piece.finish, n => { piece.finish = n; if (piece === state.est) syncFromEst(); }));
   const list = o.paint === "epoxy" ? EPOXY : LAQUEADA;
   wrap.appendChild(label("Color (" + o.n + ")"));
   const r = row();
   list.forEach(c => r.appendChild(swatchCell(c[1], c[0], piece.color === c[0], () => { piece.color = c[0]; if (piece === state.est) syncFromEst(); })));
   wrap.appendChild(r);
+  if (o.paint === "epoxy") wrap.appendChild(note("Salvedad: en Epoxy solo el blanco y el negro están disponibles en brillante y mate. Los demás colores son satinados."));
   if (o.paint === "laqueada"){
     wrap.appendChild(label("Colores especiales"));
     const r2 = row();
@@ -740,7 +751,7 @@ const PRESETS = [
 ];
 const presetRow = document.getElementById("presetRow");
 PRESETS.forEach(p => {
-  const b = document.createElement("button"); b.type = "button"; b.className = "preset-btn"; b.textContent = p.label;
+  const b = document.createElement("button"); b.type = "button"; b.className = "preset-btn"; b.textContent = disp(p.label);
   b.addEventListener("click", e => { if (e.isTrusted) pageJustOpened = false; p.set(); update(); });
   presetRow.appendChild(b);
 });
