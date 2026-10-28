@@ -273,6 +273,7 @@
   .chair-code{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin-top:6px;}
   .hero-title p{display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-start; text-align:left; gap:8px 12px;}
   .stock-pill{display:inline-block; margin:0; padding:3px 11px; border-radius:999px; background:var(--ink); color:var(--wash); font-size:11.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;}
+  .preset-btn.mixcta{background:linear-gradient(90deg,#af2579,#d9480f) !important; color:#fff !important; border-color:transparent !important; font-weight:600;}
   .preset-btn.surprise{background:var(--ink) !important; color:var(--wash) !important; border-color:var(--ink) !important; font-weight:600;}
   .odo{display:inline-flex; align-items:flex-start; height:1.15em; line-height:1.15em; overflow:hidden; font-variant-numeric:tabular-nums; vertical-align:bottom;}
   .odo-col{display:inline-block; height:1.15em; overflow:hidden;}
@@ -843,26 +844,28 @@ function applyTitleColor(){
 const PRESETS = [
   {label:"Full color", set:() => { state.est = {opt:"Pintura laqueada", color:"Rojo", finish:"Mate"}; state.esf = {same:true, fam:"Madera", opt:"Guatambú", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
   {label:"Tenis", set:() => { state.est = {opt:"Epoxy", color:"Terracota", finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
-  {label:"Se me ocurre otra cosa", mix:true, set:() => { state.est = {opt:"Epoxy", color:"Verde Lima", finish:"Satinado"}; state.esf = {fam:"Madera", opt:"Pintura laqueada", color:"Violeta", finish:"Mate"}; state.asi = {fam:"Tapizado", opt:"Pana bouclé", felpa:"Sunset", color:"Naranja"}; }},
   {label:"Full crudo", set:() => { state.est = {opt:"Crudo", color:null, finish:"Mate"}; state.esf = {fam:"Metal", opt:"Crudo", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
   {label:"Full cromo", set:() => { state.est = {opt:"Cromado", color:null, finish:"Mate"}; state.esf = {fam:"Metal", opt:"Cromado", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
   {label:"Cromo y roble", set:() => { state.est = {opt:"Cromado", color:null, finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Madera", opt:"Roble", felpa:"Sunset", color:null}; }},
   {label:"Color y roble", set:() => { state.est = {opt:"Pintura laqueada", color:"Azul", finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Madera", opt:"Roble", felpa:"Sunset", color:null}; }},
   {label:"Cromo, Felpa y roble", set:() => { state.est = {opt:"Cromado", color:null, finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Tapizado", opt:"Felpa", felpa:"Sunset", color:null}; }},
-  {label:"Color, Felpa y roble", set:() => { state.est = {opt:"Pintura laqueada", color:"Azul", finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Tapizado", opt:"Felpa", felpa:"Sunset", color:null}; }}
+  {label:"Color, Felpa y roble", set:() => { state.est = {opt:"Pintura laqueada", color:"Azul", finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Tapizado", opt:"Felpa", felpa:"Sunset", color:null}; }},
+  {label:"Se me ocurre otra cosa", mix:true, set:() => { state.est = {opt:"Epoxy", color:"Verde Lima", finish:"Satinado"}; state.esf = {fam:"Madera", opt:"Pintura laqueada", color:"Violeta", finish:"Mate"}; state.asi = {fam:"Tapizado", opt:"Pana bouclé", felpa:"Sunset", color:"Naranja"}; }}
 ];
 let mixKey = "";
 const presetRow = document.getElementById("presetRow");
-PRESETS.forEach(p => {
-  const b = document.createElement("button"); b.type = "button"; b.className = "preset-btn"; b.textContent = disp(p.label);
+function addPreset(p){
+  const b = document.createElement("button"); b.type = "button"; b.className = "preset-btn" + (p.mix ? " mixcta" : ""); b.textContent = disp(p.label);
   b.addEventListener("click", e => { if (e.isTrusted) pageJustOpened = false; p.set(); update(); mixKey = p.mix ? configKey() : ""; });
   presetRow.appendChild(b);
-});
+}
+PRESETS.filter(p => !p.mix).forEach(addPreset);
 {
   const b = document.createElement("button"); b.type = "button"; b.className = "preset-btn surprise"; b.textContent = "✦ Sorprendeme";
   b.addEventListener("click", randomize);
   presetRow.appendChild(b);
 }
+PRESETS.filter(p => p.mix).forEach(addPreset);
 
 document.querySelectorAll('.step-header').forEach(h => h.addEventListener('click', () => h.closest('.step').classList.toggle('collapsed')));
 
