@@ -393,7 +393,13 @@
 
 <script>
 const IMGDATA = null; /*EMBED*/
-const IMG = n => IMGDATA ? IMGDATA[n] : n + (n.startsWith("thumb-") ? ".jpg" : ".png");
+// Renders de terrazzo: se usan con el nombre de archivo original
+const IMG_ALIAS = {
+  "esfera-terrazzo-ansenuza": "Esferas - Terrazzo Ansenuza.105", "esfera-terrazzo-iguazu": "Esferas - Terrazzo iguazú.104",
+  "asiento-terrazzo-ansenuza": "Asiento - Terrazzo ansenuza.102", "asiento-terrazzo-iguazu": "Asiento - Terrazzo iguazú.103"
+};
+const FILE = n => IMG_ALIAS[n] ? encodeURIComponent(IMG_ALIAS[n]) : n;
+const IMG = n => IMGDATA ? IMGDATA[n] : FILE(n) + (n.startsWith("thumb-") ? ".jpg" : ".png");
 
 const BASE = 159000;
 const IVA = 0.21;
@@ -410,11 +416,14 @@ const FELPAS = [
   {n:"Sunset", f:"sunset"}, {n:"Sunset II", f:"sunset-ii"}, {n:"La Musique", f:"la-musique"}, {n:"Ser B&N", f:"ser-byn"}
 ];
 
+const TERRAZZO_NOTE = "Terrazzo Blangino® × Instone®: alianza entre dos marcas registradas. Imagen referencial; cada pieza tiene un diseño de vetas único.";
 const BG_CRUDO = "#c9c6bd";
 const BG_CROMO = "linear-gradient(135deg,#e8eaeb,#b7bcc0)";
 const BG_TORNA = "linear-gradient(135deg,#5aa0c9,#c95a9e,#e0c95a)";
 const BG_LAQ = "conic-gradient(#af2734,#ff9800,#fedf00,#72b896,#0061a9,#9079af,#af2734)";
 const BG_EPX = "linear-gradient(135deg,#0061a9 50%,#af2734 50%)";
+const BG_TERR_ANS = "radial-gradient(circle at 28% 32%,#8a3a4a 0 2px,transparent 3px) 0 0/9px 9px,radial-gradient(circle at 72% 68%,#a9c5ab 0 2px,transparent 3px) 0 0/7px 7px,#eeeeec";
+const BG_TERR_IGU = "radial-gradient(circle at 28% 32%,#13803a 0 2.2px,transparent 3.2px) 0 0/8px 8px,radial-gradient(circle at 72% 68%,#13803a 0 1.5px,transparent 2.5px) 0 0/6px 6px,#eeeeec";
 const BG_ROBLE = "#c8a878", BG_GUAT = "#e8d9a8";
 
 const EST_OPTS = [
@@ -430,6 +439,10 @@ const ESF_OPTS = {
     {n:"Guatambú", p:0, bg:BG_GUAT, img:"esfera-madera-guatambu"},
     {n:"Pintura laqueada", p:30000, bg:BG_LAQ, paint:"laqueada"}
   ],
+  Terrazzo: [
+    {n:"Ansenuza", p:60000, bg:BG_TERR_ANS, img:"esfera-terrazzo-ansenuza"},
+    {n:"Iguazú", p:60000, bg:BG_TERR_IGU, img:"esfera-terrazzo-iguazu"}
+  ],
   Metal: [
     {n:"Crudo", p:160000, bg:BG_CRUDO, img:"esfera-metal-crudo"},
     {n:"Cromado", p:190000, bg:BG_CROMO, img:"esfera-metal-cromado"},
@@ -440,6 +453,10 @@ const ASI_OPTS = {
   Madera: [
     {n:"Roble", p:210000, bg:BG_ROBLE, img:"asiento-madera-roble"},
     {n:"Guatambú", p:180000, bg:BG_GUAT, img:"asiento-madera-guatambu"}
+  ],
+  Terrazzo: [
+    {n:"Ansenuza", p:210000, bg:BG_TERR_ANS, img:"asiento-terrazzo-ansenuza"},
+    {n:"Iguazú", p:210000, bg:BG_TERR_IGU, img:"asiento-terrazzo-iguazu"}
   ],
   Tapizado: [
     {n:"Felpa", p:90000, bg:"#8a7863", sub:"felpa"},
@@ -518,6 +535,7 @@ function describeAsi(){
   }
   const o = asiOpt();
   if (state.asi.fam === "Madera") return "Madera " + o.n;
+  if (state.asi.fam === "Terrazzo") return "Terrazzo " + o.n;
   if (o.n === "Felpa") return "Tapizado Felpa® · " + state.asi.felpa;
   if (o.n === "Otras panas") return "Tapizado · otras panas · color " + state.asi.color;
   return "Tapizado " + o.n;
@@ -673,9 +691,10 @@ function buildEsfera(){
     body.appendChild(optionRow([{n:"Igual que estructura (madera laqueada)", bg:BG_LAQ}], state.esf.same ? "Igual que estructura (madera laqueada)" : null, () => { state.esf.same = true; }));
     body.appendChild(label("O elegir otra esfera"));
   }
-  body.appendChild(toggle(["Madera", "Metal"], state.esf.same ? null : state.esf.fam, n => { state.esf.same = false; state.esf.fam = n; state.esf.opt = ESF_OPTS[n][0].n; normalize(); }));
+  body.appendChild(toggle(["Madera", "Terrazzo", "Metal"], state.esf.same ? null : state.esf.fam, n => { state.esf.same = false; state.esf.fam = n; state.esf.opt = ESF_OPTS[n][0].n; normalize(); }));
   if (state.esf.same){ body.appendChild(note("La esfera lleva el mismo color y acabado que la estructura, en madera laqueada.")); return; }
   body.appendChild(optionRow(ESF_OPTS[state.esf.fam], state.esf.opt, o => { state.esf.opt = o.n; normalize(); syncFromEst(); }));
+  if (state.esf.fam === "Terrazzo") body.appendChild(note(TERRAZZO_NOTE));
   const o = esfOpt();
   if (o.paint){ const p = subPanel(); colorRows(p, state.esf, o); body.appendChild(p); }
 }
@@ -686,7 +705,7 @@ function buildAsiento(){
     body.appendChild(optionRow([{n:"Igual que estructura", bg:BG_LAQ}], state.asi.fam === "Metal" ? "Igual que estructura" : null, () => { state.asi.fam = "Metal"; state.asi.opt = null; }));
     body.appendChild(label("O elegir otro asiento"));
   }
-  body.appendChild(toggle(["Madera", "Tapizado", "Metal"], state.asi.fam, n => {
+  body.appendChild(toggle(["Madera", "Terrazzo", "Tapizado", "Metal"], state.asi.fam, n => {
     state.asi.fam = n; state.asi.opt = n === "Metal" ? null : ASI_OPTS[n][0].n; normalize();
   }, noMetal ? ["Metal"] : null));
   if (noMetal) body.appendChild(note("El asiento de metal no está disponible con estructura Tornasolado."));
@@ -696,6 +715,7 @@ function buildAsiento(){
     body.appendChild(p); return;
   }
   body.appendChild(optionRow(ASI_OPTS[state.asi.fam], state.asi.opt, o => { state.asi.opt = o.n; normalize(); }));
+  if (state.asi.fam === "Terrazzo") body.appendChild(note(TERRAZZO_NOTE));
   const o = asiOpt();
   if (o.sub === "felpa"){
     const p = subPanel(); p.appendChild(label("Estampado"));
@@ -784,10 +804,10 @@ function randomize(){
     state.est = {opt: eo.n, color: eo.paint ? pick(eo.paint === "epoxy" ? EPOXY : LAQUEADA)[0] : null, finish: pick(["Mate", "Brillante"])};
     if (eo.paint === "laqueada" && Math.random() < .4) state.esf = {same: true, fam: "Madera", opt: "Guatambú", color: null, finish: "Mate"};
     else {
-      const fam = pick(["Madera", "Metal"]), o = pick(ESF_OPTS[fam]);
+      const fam = pick(["Madera", "Terrazzo", "Metal"]), o = pick(ESF_OPTS[fam]);
       state.esf = {fam, opt: o.n, color: o.paint ? pick(o.paint === "epoxy" ? EPOXY : LAQUEADA)[0] : null, finish: pick(["Mate", "Brillante"])};
     }
-    const af = pick(["Metal", "Madera", "Tapizado"]);
+    const af = pick(["Metal", "Madera", "Terrazzo", "Tapizado"]);
     state.asi = af === "Metal" ? {fam: "Metal", opt: null, felpa: "Sunset", color: null}
       : {fam: af, opt: pick(ASI_OPTS[af]).n, felpa: pick(FELPAS).n, color: pick(LAQUEADA)[0]};
     normalize();
