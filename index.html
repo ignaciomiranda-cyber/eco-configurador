@@ -279,6 +279,8 @@
   .preset-btn.mixcta{background:linear-gradient(90deg,#af2579,#d9480f) !important; color:#fff !important; border-color:transparent !important; font-weight:600;}
   .preset-btn.surprise{background:var(--ink) !important; color:var(--wash) !important; border-color:var(--ink) !important; font-weight:600;}
   .odo{display:inline-flex; align-items:flex-start; height:1.15em; line-height:1.15em; overflow:hidden; font-variant-numeric:tabular-nums; vertical-align:bottom;}
+  .odo.inf{font-size:1.7em; height:1em; line-height:1em;}
+  .odo.inf .odo-sep{height:1em; line-height:1em;}
   .odo-col{display:inline-block; height:1.15em; overflow:hidden;}
   .odo-strip{display:block; transition:transform .9s cubic-bezier(.2,.9,.25,1);}
   .odo-strip i{display:block; height:1.15em; line-height:1.15em; font-style:normal;}
@@ -572,8 +574,8 @@ function zebraPattern(w, h){
     const top = [], bot = [];
     for (let k = 0; k <= 56; k++){
       const t = k / 56, y = t * h * 1.25 - 120;
-      const off = i * 84 + y * 0.5 + Math.sin(t * 8) * 16;
-      const th = 38 + 3 * Math.sin(t * 7);
+      const off = i * 84 + y * 0.5 + Math.sin(t * 8 + i * .9) * 28 + Math.sin(t * 17 + i * 2.1) * 10;
+      const th = 36 + 10 * Math.sin(t * 6 + i * 1.9) + 5 * Math.sin(t * 13 + i);
       top.push([off - th / 2, y]); bot.push([off + th / 2, y]);
     }
     x.beginPath(); x.moveTo(top[0][0], top[0][1]);
@@ -788,7 +790,7 @@ function update(){
 
 /* ---------- extras: odómetro, nombre, ola de color, sorpresa ---------- */
 function setOdo(el, str){
-  el.classList.add("odo"); el.dataset.val = str; el.setAttribute("aria-label", str);
+  el.classList.add("odo"); el.classList.toggle("inf", str === "∞"); el.dataset.val = str; el.setAttribute("aria-label", str);
   const chars = [...str];
   if (el._odoLen !== chars.length){
     el.innerHTML = ""; el._odoLen = chars.length; el._strips = [];
