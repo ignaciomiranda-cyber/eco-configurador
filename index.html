@@ -264,7 +264,23 @@
   @property --wash{syntax:"<color>"; inherits:true; initial-value:#ffffff;}
   @property --title{syntax:"<color>"; inherits:true; initial-value:#232226;}
   html{--wash:#ffffff; --title:#232226; transition:--wash .8s ease, --title .8s ease;}
-  html,body{background:var(--wash) !important;}
+  html{background:var(--wash) !important;}
+  body{background:transparent !important;}
+  #sphereWrap{position:absolute; inset:0; pointer-events:none;}
+  #sphereCanvas{position:absolute; inset:0; width:100%; height:100%; transform-origin:59.2% 23.5%; animation:eco-sway 5.5s ease-in-out infinite;}
+  @keyframes eco-sway{0%,100%{transform:rotate(-4.5deg) translateY(0);} 50%{transform:rotate(4.5deg) translateY(-.4%);}}
+  #sphereWrap.drop{animation:eco-drop .95s cubic-bezier(.3,0,.3,1);}
+  @keyframes eco-drop{0%{transform:translateY(-7%);} 42%{transform:translateY(0);} 58%{transform:translateY(-1.8%);} 76%{transform:translateY(0);} 88%{transform:translateY(-.6%);} 100%{transform:translateY(0);}}
+  .chair-tag{position:absolute; top:24px; left:28px; max-width:170px; z-index:2; pointer-events:none;}
+  .chair-name{font-family:"Outfit",sans-serif; font-size:20px; font-weight:600; letter-spacing:-.01em; line-height:1.15; color:var(--title);}
+  .chair-code{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin-top:6px;}
+  .preset-btn.surprise{background:var(--ink) !important; color:var(--wash) !important; border-color:var(--ink) !important; font-weight:600;}
+  .odo{display:inline-flex; align-items:flex-start; height:1.15em; line-height:1.15em; overflow:hidden; font-variant-numeric:tabular-nums; vertical-align:bottom;}
+  .odo-col{display:inline-block; height:1.15em; overflow:hidden;}
+  .odo-strip{display:block; transition:transform .9s cubic-bezier(.2,.9,.25,1);}
+  .odo-strip i{display:block; height:1.15em; line-height:1.15em; font-style:normal;}
+  .odo-sep{display:inline-block; height:1.15em;}
+  @media (prefers-reduced-motion:reduce){#sphereCanvas,#sphereWrap.drop{animation:none;} .odo-strip{transition:none;}}
   .hero-title h1,.step-label{color:var(--title) !important;}
   .configurator,.panel,.step,.presets,footer{border-color:rgba(35,34,38,.14);}
   .preset-btn{background:rgba(255,255,255,.55);}
@@ -283,6 +299,7 @@
   @media (max-width:860px){
     .preview{flex-direction:column !important; padding:20px 16px 26px !important; min-height:0 !important;}
     .preview-imgwrap{max-width:420px !important; margin:0 auto;}
+    .chair-tag{position:static !important; max-width:none !important; text-align:center; margin-top:14px;}
     .preview-caption{position:static !important; left:auto !important; right:auto !important; bottom:auto !important; margin:14px 4px 0; text-align:center; font-size:12.5px !important; line-height:1.5; color:var(--ink-soft) !important; letter-spacing:.01em;}
     .hero-title{padding-bottom:24px !important;}
     .panel{padding:26px 20px 48px !important;}
@@ -304,7 +321,8 @@
 
 <div class="configurator">
   <div class="preview">
-    <div class="preview-imgwrap"><canvas id="previewCanvas" width="1280" height="1280"></canvas><canvas id="prevCanvas" width="1280" height="1280" style="pointer-events:none; opacity:0;"></canvas></div>
+    <div class="preview-imgwrap"><canvas id="previewCanvas" width="1280" height="1280"></canvas><div id="sphereWrap"><canvas id="sphereCanvas" width="1280" height="1280"></canvas></div><canvas id="prevCanvas" width="1280" height="1280" style="pointer-events:none; opacity:0;"></canvas></div>
+    <div class="chair-tag"><div class="chair-name" id="chairName"></div><div class="chair-code" id="chairCode"></div></div>
     <div class="preview-caption" id="previewCaption"></div>
   </div>
 
@@ -349,7 +367,7 @@
       </div>
       <button class="cta" type="button" id="ctaBtn">Enviar configuración por WhatsApp</button>
       <div class="fine-print"><strong>Imágenes aproximadas.</strong> Los colores y acabados que ves en pantalla son una referencia: pueden diferir del producto real. Te recomendamos pedir fotos reales de las muestras antes de decidir.</div>
-      <div class="fine-print"><strong>Producto único.</strong> Cada Eco se fabrica a pedido y es personalizada, por eso puede tener variaciones respecto de lo que ves acá.</div>
+      <div class="fine-print"><strong>Producto único.</strong> Cada Eco se fabrica a pedido y es personalizada, por eso puede tener variaciones respecto de lo que ves acá. El nombre y el número de configuración identifican tu combinación; no son una edición numerada.</div>
       <div class="fine-print">Precio final con IVA incluido. Producción a medida, 30 días aprox. Los colores se confirman por WhatsApp antes de producir y los colores especiales están sujetos a disponibilidad.</div>
     </div>
 
@@ -428,7 +446,8 @@ const ASI_OPTS = {
   Tapizado: [
     {n:"Felpa", p:90000, bg:"#8a7863", sub:"felpa"},
     {n:"Pana", p:80000, bg:"repeating-linear-gradient(90deg,#efece6,#efece6 2px,#e2ded6 2px,#e2ded6 4px)", img:"asiento-tapizado-pana"},
-    {n:"Otro", p:80000, bg:"conic-gradient(#af2734,#ff9800,#fedf00,#72b896,#0061a9,#9079af,#af2734)", sub:"otro"}
+    {n:"Pana bouclé", p:80000, bg:"radial-gradient(circle at 30% 30%,#fbf9f4 0 3px,transparent 4px) 0 0/9px 9px,radial-gradient(circle at 70% 65%,#e9e4d9 0 3px,transparent 4px) 0 0/9px 9px,#f3efe6", img:"asiento-tapizado-pana"},
+    {n:"Otras panas", p:80000, bg:"conic-gradient(#af2734,#ff9800,#fedf00,#72b896,#0061a9,#9079af,#af2734)", sub:"otro"}
   ]
 };
 // Asiento de metal: va soldado a la estructura, mismo acabado. Precio según el acabado de la estructura.
@@ -463,7 +482,7 @@ function normalize(){
   const s = esfOpt(); if (s && s.paint && !state.esf.color) state.esf.color = "Blanco";
   if (e.paint === "epoxy" && !colorByName(EPOXY, state.est.color)) state.est.color = "Blanco";
   if (s && s.paint === "epoxy" && !colorByName(EPOXY, state.esf.color)) state.esf.color = "Blanco";
-  if (state.asi.fam === "Tapizado" && state.asi.opt === "Otro" && !state.asi.color) state.asi.color = "Blanco";
+  if (state.asi.fam === "Tapizado" && state.asi.opt === "Otras panas" && !state.asi.color) state.asi.color = "Blanco";
   // Epoxy: solo blanco y negro existen en mate y brillante; los demás colores son satinados.
   [["est", estOpt()], ["esf", esfOpt()]].forEach(([k, o]) => {
     if (!o || !o.paint) return;
@@ -502,7 +521,7 @@ function describeAsi(){
   const o = asiOpt();
   if (state.asi.fam === "Madera") return "Madera " + o.n;
   if (o.n === "Felpa") return "Tapizado Felpa® · " + state.asi.felpa;
-  if (o.n === "Otro") return "Tapizado Pana · color " + state.asi.color;
+  if (o.n === "Otras panas") return "Tapizado · otras panas · color " + state.asi.color;
   return "Tapizado " + o.n;
 }
 
@@ -551,9 +570,10 @@ function asiLayer(){
   const o = asiOpt();
   if (o.img) return [o.img, null];
   if (o.n === "Felpa") return ["asiento-tapizado-felpa-" + FELPAS.find(f => f.n === state.asi.felpa).f, null];
-  return ["asiento-tapizado-pana", hexOf(allColors(), state.asi.color)];
+  return ["asiento-tapizado-pana", hexOf(allColors(), state.asi.color)];  // "Otras panas": pana blanca teñida
 }
-let drawToken = 0;
+let drawToken = 0, lastSphereKey = "";
+const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 async function drawPreview(){
   const token = ++drawToken;
   const specs = pageJustOpened
@@ -564,13 +584,24 @@ async function drawPreview(){
     if (token !== drawToken) return;
     const cv = document.getElementById("previewCanvas"), x = cv.getContext("2d");
     const pv = document.getElementById("prevCanvas"), px = pv.getContext("2d");
+    const sv = document.getElementById("sphereCanvas"), sx = sv.getContext("2d");
     // fundido cruzado: la imagen anterior se desvanece sobre la nueva
-    px.clearRect(0, 0, pv.width, pv.height); px.drawImage(cv, 0, 0);
+    px.clearRect(0, 0, pv.width, pv.height); px.drawImage(cv, 0, 0); px.drawImage(sv, 0, 0);
     pv.style.transition = "none"; pv.style.opacity = "1";
-    x.clearRect(0, 0, cv.width, cv.height);
-    imgs.forEach(i => x.drawImage(i, 0, 0, cv.width, cv.height));
+    const W = cv.width, H = cv.height, SPLIT = 400;
+    x.clearRect(0, 0, W, H); sx.clearRect(0, 0, W, H);
+    x.drawImage(imgs[0], 0, 0, W, H); x.drawImage(imgs[1], 0, 0, W, H);
+    // esfera: la parte baja (pie) queda fija en el canvas principal; la bola de arriba va en su propio canvas y se mueve
+    x.save(); x.beginPath(); x.rect(0, SPLIT, W, H - SPLIT); x.clip(); x.drawImage(imgs[2], 0, 0, W, H); x.restore();
+    sx.save(); sx.beginPath(); sx.rect(0, 0, W, SPLIT); sx.clip(); sx.drawImage(imgs[2], 0, 0, W, H); sx.restore();
+    x.drawImage(imgs[3], 0, 0, W, H);
     void pv.offsetWidth;
     pv.style.transition = "opacity .45s ease"; pv.style.opacity = "0";
+    const sk = specs[1].join("|");
+    if (lastSphereKey && sk !== lastSphereKey && !REDUCED){
+      const sw = document.getElementById("sphereWrap"); sw.classList.remove("drop"); void sw.offsetWidth; sw.classList.add("drop");
+    }
+    lastSphereKey = sk;
   }catch(err){ console.error("No se pudo cargar el render:", err.message); }
 }
 
@@ -702,12 +733,98 @@ function update(){
   const sub = BASE + pb.adic, iva = Math.round(sub * IVA);
   document.getElementById("baseLine").textContent = fmt(BASE);
   document.getElementById("ivaValue").textContent = fmt(iva);
-  document.getElementById("totalValue").textContent = fmt(sub + iva);
+  setOdo(document.getElementById("totalValue"), fmt(sub + iva));
   const al = document.getElementById("adicLine");
   if (pb.adic > 0){ al.style.display = "flex"; document.getElementById("adicValue").textContent = "+" + fmt(pb.adic); } else al.style.display = "none";
   document.getElementById("previewCaption").textContent = describeEst() + " · Esfera " + describeEsf() + " · Asiento " + describeAsi();
+  const id = chairIdentity();
+  showName(id.name);
+  document.getElementById("chairCode").textContent = "Configuración nº " + id.code;
   applyTitleColor();
   drawPreview();
+}
+
+/* ---------- extras: odómetro, nombre, ola de color, sorpresa ---------- */
+function setOdo(el, str){
+  el.classList.add("odo"); el.dataset.val = str; el.setAttribute("aria-label", str);
+  const chars = [...str];
+  if (el._odoLen !== chars.length){
+    el.innerHTML = ""; el._odoLen = chars.length; el._strips = [];
+    chars.forEach(ch => {
+      if (/\d/.test(ch)){
+        const col = document.createElement("span"); col.className = "odo-col"; col.setAttribute("aria-hidden", "true");
+        const st = document.createElement("span"); st.className = "odo-strip";
+        for (let d = 0; d < 10; d++){ const i = document.createElement("i"); i.textContent = d; st.appendChild(i); }
+        col.appendChild(st); el.appendChild(col); el._strips.push(st);
+      } else {
+        const s = document.createElement("span"); s.className = "odo-sep"; s.textContent = ch; s.setAttribute("aria-hidden", "true"); el.appendChild(s); el._strips.push(null);
+      }
+    });
+    void el.offsetWidth;
+  }
+  chars.forEach((ch, i) => {
+    const st = el._strips[i]; if (!st) return;
+    st.style.transitionDelay = ((chars.length - 1 - i) * 40) + "ms";
+    st.style.transform = "translateY(-" + (+ch * 1.15) + "em)";
+  });
+}
+const ADJ = ["Fugaz", "Atrevida", "Serena", "Traviesa", "Radiante", "Cómplice", "Sutil", "Rotunda", "Ligera", "Tenaz", "Dulce", "Insolente"];
+function hashStr(s){ let h = 2166136261; for (let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function configKey(){ return [describeEst(), describeEsf(), describeAsi()].join("|"); }
+function chairIdentity(){
+  const h = hashStr(configKey()), e = estOpt();
+  const core = e.paint ? state.est.color : (e.n === "Cromado" ? "Cromo" : e.n === "Tornasolado" ? "Tornasol" : "Crudo");
+  return {name: "Eco " + core + " " + ADJ[h % ADJ.length], code: String(h % 10000).padStart(4, "0")};
+}
+let lastName = "", scrambleRaf = 0;
+function showName(txt){
+  const el = document.getElementById("chairName");
+  if (txt === lastName) return; lastName = txt;
+  cancelAnimationFrame(scrambleRaf);
+  if (REDUCED){ el.textContent = txt; return; }
+  const t0 = performance.now(), D = 450, abc = "ABCDEFGHIJLMNOPRSTUVXZ";
+  const step = now => {
+    const k = Math.min(1, (now - t0) / D), n = Math.floor(k * txt.length);
+    el.textContent = k >= 1 ? txt : txt.slice(0, n) + [...txt.slice(n)].map(c => c === " " ? " " : abc[Math.random() * abc.length | 0]).join("");
+    if (k < 1) scrambleRaf = requestAnimationFrame(step);
+  };
+  scrambleRaf = requestAnimationFrame(step);
+}
+// Ola de color: el fondo nuevo se expande en círculo desde el punto donde se hizo click.
+let lastClick = null, prevWash = [255, 255, 255], waveRaf = 0;
+document.addEventListener("click", e => { lastClick = {x: e.pageX, y: e.pageY, t: Date.now()}; }, true);
+function runWave(from, to, pt){
+  cancelAnimationFrame(waveRaf);
+  const de = document.documentElement;
+  const maxR = Math.hypot(Math.max(pt.x, de.scrollWidth - pt.x), Math.max(pt.y, de.scrollHeight - pt.y)) + 60;
+  const f = "rgb(" + from.join(",") + ")", t = "rgb(" + to.join(",") + ")", t0 = performance.now(), D = 1100;
+  const step = now => {
+    const k = Math.min(1, (now - t0) / D), r = (1 - Math.pow(1 - k, 3)) * maxR;
+    if (k < 1){
+      de.style.setProperty("background", "radial-gradient(circle at " + pt.x + "px " + pt.y + "px," + t + " " + Math.max(0, r - 40) + "px," + f + " " + r + "px)", "important");
+      waveRaf = requestAnimationFrame(step);
+    } else de.style.removeProperty("background");
+  };
+  waveRaf = requestAnimationFrame(step);
+}
+const pick = a => a[Math.random() * a.length | 0];
+function randomize(){
+  const before = configKey();
+  for (let tries = 0; tries < 12; tries++){
+    const eo = pick(EST_OPTS);
+    state.est = {opt: eo.n, color: eo.paint ? pick(eo.paint === "epoxy" ? EPOXY : LAQUEADA)[0] : null, finish: pick(["Mate", "Brillante"])};
+    if (eo.paint === "laqueada" && Math.random() < .4) state.esf = {same: true, fam: "Madera", opt: "Guatambú", color: null, finish: "Mate"};
+    else {
+      const fam = pick(["Madera", "Metal"]), o = pick(ESF_OPTS[fam]);
+      state.esf = {fam, opt: o.n, color: o.paint ? pick(o.paint === "epoxy" ? EPOXY : LAQUEADA)[0] : null, finish: pick(["Mate", "Brillante"])};
+    }
+    const af = pick(["Metal", "Madera", "Tapizado"]);
+    state.asi = af === "Metal" ? {fam: "Metal", opt: null, felpa: "Sunset", color: null}
+      : {fam: af, opt: pick(ASI_OPTS[af]).n, felpa: pick(FELPAS).n, color: pick(LAQUEADA)[0]};
+    normalize();
+    if (configKey() !== before) break;
+  }
+  pageJustOpened = false; update();
 }
 // Contraste WCAG entre dos colores [r,g,b]
 function relLum(c){ const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]); }
@@ -731,6 +848,8 @@ function applyTitleColor(){
     }
   }
   const root = document.documentElement.style;
+  if (!REDUCED && lastClick && Date.now() - lastClick.t < 1500 && wash.join() !== prevWash.join()) runWave(prevWash, wash, lastClick);
+  prevWash = wash;
   root.setProperty("--wash", "rgb(" + wash.join(",") + ")");
   root.setProperty("--title", ensureContrast(base, wash, 7));          // títulos: el color, oscurecido hasta leerse bien
   root.setProperty("--ink", ensureContrast([35, 34, 38], wash, 12));   // texto principal
@@ -755,16 +874,22 @@ PRESETS.forEach(p => {
   b.addEventListener("click", e => { if (e.isTrusted) pageJustOpened = false; p.set(); update(); });
   presetRow.appendChild(b);
 });
+{
+  const b = document.createElement("button"); b.type = "button"; b.className = "preset-btn surprise"; b.textContent = "✦ Sorprendeme";
+  b.addEventListener("click", randomize);
+  presetRow.appendChild(b);
+}
 
 document.querySelectorAll('.step-header').forEach(h => h.addEventListener('click', () => h.closest('.step').classList.toggle('collapsed')));
 
 /* ---------- confirmación / WhatsApp ---------- */
 function openConfirm(){
   document.getElementById("modalLines").innerHTML =
+    '<div class="row"><span>Nombre</span><strong>' + chairIdentity().name + ' · nº ' + chairIdentity().code + '</strong></div>' +
     '<div class="row"><span>Estructura</span><strong>' + describeEst() + '</strong></div>' +
     '<div class="row"><span>Esfera</span><strong>' + describeEsf() + '</strong></div>' +
     '<div class="row"><span>Asiento</span><strong>' + describeAsi() + '</strong></div>';
-  document.getElementById("modalTotal").textContent = document.getElementById("totalValue").textContent;
+  document.getElementById("modalTotal").textContent = document.getElementById("totalValue").dataset.val;
   const ack = document.getElementById("ackBox"); ack.checked = false;
   const cb = document.getElementById("modalConfirm"); cb.disabled = true; cb.style.opacity = ".4"; cb.style.cursor = "not-allowed";
   document.getElementById("modalOverlay").classList.add("open");
@@ -776,9 +901,10 @@ document.getElementById("ackBox").addEventListener("change", e => {
 });
 function confirmSend(){
   if (!document.getElementById("ackBox").checked) return;
-  const msg = "Hola! Armé esta config de la Silla Eco:\n- Estructura: " + describeEst() +
+  const id = chairIdentity();
+  const msg = "Hola! Armé esta config de la Silla Eco (" + id.name + ", configuración nº " + id.code + "):\n- Estructura: " + describeEst() +
     "\n- Esfera: " + describeEsf() + "\n- Asiento: " + describeAsi() +
-    "\n- Total estimado: " + document.getElementById("totalValue").textContent + "\nEntiendo que es un producto único y un experimento, y estamos felices de que así sea. Quisiera ver fotos reales de las muestras.\nQuiero confirmar el pedido.";
+    "\n- Total estimado: " + document.getElementById("totalValue").dataset.val + "\nEntiendo que es un producto único y un experimento, y estamos felices de que así sea. Quisiera ver fotos reales de las muestras.\nQuiero confirmar el pedido.";
   window.open("https://wa.me/5493518756998?text=" + encodeURIComponent(msg), "_blank");
   closeConfirm();
 }
