@@ -275,8 +275,6 @@
   .fine-print.legal{margin-top:14px; padding-top:12px; border-top:1px solid rgba(35,34,38,.14);}
   .fine-print.legal p{font-size:10.5px; line-height:1.55; margin:0 0 7px; color:var(--ink-faint);}
   .fine-print.legal strong{color:var(--ink-soft);}
-  #artBg{position:fixed; inset:0; z-index:-1; pointer-events:none; background:center/cover no-repeat; opacity:0; transition:opacity .9s ease; filter:blur(2px) saturate(1.05);}
-  #artBg.on{opacity:.28;}
   .stock-pill{display:inline-block; margin:0; padding:3px 11px; border-radius:999px; background:var(--ink); color:var(--wash); font-size:11.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;}
   .preset-btn.mixcta{background:linear-gradient(90deg,#af2579,#d9480f) !important; color:#fff !important; border-color:transparent !important; font-weight:600;}
   .preset-btn.surprise{background:var(--ink) !important; color:var(--wash) !important; border-color:var(--ink) !important; font-weight:600;}
@@ -320,7 +318,6 @@
 </head>
 <body>
 
-<div id="artBg"></div>
 <div class="breadcrumb">Inicio · Mobiliario y complementos · Eco · Configurador</div>
 
 <div class="hero-title">
@@ -575,7 +572,7 @@ async function layer(name, hex){
   const x = c.getContext("2d");
   x.drawImage(im, 0, 0);
   x.globalCompositeOperation = "multiply";
-  if (hex === "art"){ const ai = await loadImg("arte"); x.drawImage(ai, 0, 640 - 443, 1280, 886); } else { x.fillStyle = hex; x.fillRect(0, 0, c.width, c.height); }
+  if (hex === "art"){ const ai = await loadImg("arte-fondo"); x.drawImage(ai, 183, 80, 820, 1112); } else { x.fillStyle = hex; x.fillRect(0, 0, c.width, c.height); }
   x.globalCompositeOperation = "destination-in"; x.drawImage(im, 0, 0);
   tintCache[key] = c; return c;
 }
@@ -845,9 +842,7 @@ function applyTitleColor(){
   let hex = (!pageJustOpened && estOpt().paint) ? hexOf(allColors(), state.est.color) : null;
   const art = hex === "art";
   if (art) hex = "#3f9a96";   // verde azulado de la ilustración
-  const bg = document.getElementById("artBg");
-  if (art && !bg.style.backgroundImage) bg.style.backgroundImage = 'url("' + IMG("arte-fondo") + '")';
-  bg.classList.toggle("on", art);
+
   let wash = [255, 255, 255], base = [35, 34, 38];
   if (hex){
     const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
