@@ -314,6 +314,8 @@
     .swatch-cell{width:64px !important;}
     .summary-total .value{font-size:28px !important;}
   }
+
+  .bigInf{font-size:30px; line-height:.5; font-family:Arial,sans-serif; display:inline-block; vertical-align:middle; font-weight:400;}
 </style>
 </head>
 <body>
@@ -521,7 +523,7 @@ function normalize(){
 }
 const ZEBRA = ["Arte", "art"];
 function allColors(){ return LAQUEADA.concat(ESPECIALES, EPOXY_EXTRA, [ZEBRA]); }
-const cn = c => c === "Arte" ? "imagen incrustada" : c;
+const cn = c => c === "Arte" ? "logo MIL9 repetido" : c;
 function hexOf(list, name){ const c = colorByName(list, name); return c ? c[1] : null; }
 
 function priceBreakdown(){
@@ -532,6 +534,7 @@ function priceBreakdown(){
   return {e, s, a, adic: e + s + a};
 }
 
+const inf = t => t === "∞" ? '<span class="bigInf">∞</span>' : t;
 function describeEst(){
   if (isMix()) return "∞";
   const o = estOpt();
@@ -576,7 +579,7 @@ async function layer(name, hex){
   const x = c.getContext("2d");
   x.drawImage(im, 0, 0);
   x.globalCompositeOperation = "multiply";
-  if (hex === "art"){ const ai = await loadImg("arte-foto"); x.drawImage(ai, 116, 80, 955, 1112); } else { x.fillStyle = hex; x.fillRect(0, 0, c.width, c.height); }
+  if (hex === "art"){ const ai = await loadImg("patron-logo"); x.drawImage(ai, 0, 0, 1280, 1280); } else { x.fillStyle = hex; x.fillRect(0, 0, c.width, c.height); }
   x.globalCompositeOperation = "destination-in"; x.drawImage(im, 0, 0);
   tintCache[key] = c; return c;
 }
@@ -755,14 +758,14 @@ function buildAsiento(){
 function update(){
   normalize();
   buildEstructura(); buildEsfera(); buildAsiento();
-  document.getElementById("cur-estructura").textContent = describeEst();
-  document.getElementById("cur-esfera").textContent = describeEsf();
-  document.getElementById("cur-asiento").textContent = describeAsi();
+  document.getElementById("cur-estructura").innerHTML = inf(describeEst());
+  document.getElementById("cur-esfera").innerHTML = inf(describeEsf());
+  document.getElementById("cur-asiento").innerHTML = inf(describeAsi());
   const pb = priceBreakdown();
   const sub = BASE + pb.adic, iva = Math.round(sub * IVA);
   document.getElementById("baseLine").textContent = fmt(BASE);
   const mix = !!mixKey && configKey() === mixKey;  // "Se me ocurre otra cosa": precio infinito
-  document.getElementById("ivaValue").textContent = mix ? "∞" : fmt(iva);
+  document.getElementById("ivaValue").innerHTML = mix ? inf("∞") : fmt(iva);
   setOdo(document.getElementById("totalValue"), mix ? "∞" : fmt(sub + iva));
   const al = document.getElementById("adicLine");
   if (pb.adic > 0){ al.style.display = "flex"; document.getElementById("adicValue").textContent = mix ? "+∞" : "+" + fmt(pb.adic); } else al.style.display = "none";
@@ -845,7 +848,7 @@ function ensureContrast(c, bg, ratio){
 function applyTitleColor(){
   let hex = (!pageJustOpened && estOpt().paint) ? hexOf(allColors(), state.est.color) : null;
   const art = hex === "art";
-  if (art) hex = "#a08462";   // tono sepia de la foto
+  if (art) hex = null;
 
   let wash = [255, 255, 255], base = [35, 34, 38];
   if (hex){
@@ -898,9 +901,9 @@ document.querySelectorAll('.step-header').forEach(h => h.addEventListener('click
 function openConfirm(){
   document.getElementById("modalLines").innerHTML =
     '<div class="row"><span>Edición</span><strong>Limitada a 20 unidades (el número se asigna al confirmar)</strong></div>' +
-    '<div class="row"><span>Estructura</span><strong>' + describeEst() + '</strong></div>' +
-    '<div class="row"><span>Esfera</span><strong>' + describeEsf() + '</strong></div>' +
-    '<div class="row"><span>Asiento</span><strong>' + describeAsi() + '</strong></div>';
+    '<div class="row"><span>Estructura</span><strong>' + inf(describeEst()) + '</strong></div>' +
+    '<div class="row"><span>Esfera</span><strong>' + inf(describeEsf()) + '</strong></div>' +
+    '<div class="row"><span>Asiento</span><strong>' + inf(describeAsi()) + '</strong></div>';
   document.getElementById("modalTotal").textContent = document.getElementById("totalValue").dataset.val;
   const ack = document.getElementById("ackBox"); ack.checked = false;
   const cb = document.getElementById("modalConfirm"); cb.disabled = true; cb.style.opacity = ".4"; cb.style.cursor = "not-allowed";
