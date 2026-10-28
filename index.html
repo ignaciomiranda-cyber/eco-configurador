@@ -274,7 +274,7 @@
 
 <div class="configurator">
   <div class="preview">
-    <div class="preview-imgwrap"><canvas id="previewCanvas" width="1280" height="1280"></canvas></div>
+    <div class="preview-imgwrap"><canvas id="previewCanvas" width="1280" height="1280"></canvas><canvas id="prevCanvas" width="1280" height="1280" style="pointer-events:none; opacity:0;"></canvas></div>
     <div class="preview-caption" id="previewCaption"></div>
   </div>
 
@@ -522,8 +522,14 @@ async function drawPreview(){
     const imgs = await Promise.all([loadImg("sombra")].concat(specs.map(s => layer(s[0], s[1]))));
     if (token !== drawToken) return;
     const cv = document.getElementById("previewCanvas"), x = cv.getContext("2d");
+    const pv = document.getElementById("prevCanvas"), px = pv.getContext("2d");
+    // fundido cruzado: la imagen anterior se desvanece sobre la nueva
+    px.clearRect(0, 0, pv.width, pv.height); px.drawImage(cv, 0, 0);
+    pv.style.transition = "none"; pv.style.opacity = "1";
     x.clearRect(0, 0, cv.width, cv.height);
     imgs.forEach(i => x.drawImage(i, 0, 0, cv.width, cv.height));
+    void pv.offsetWidth;
+    pv.style.transition = "opacity .45s ease"; pv.style.opacity = "0";
   }catch(err){ console.error("No se pudo cargar el render:", err.message); }
 }
 
