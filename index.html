@@ -399,6 +399,7 @@ const IMG_ALIAS = {};
 const FILE = n => IMG_ALIAS[n] ? encodeURIComponent(IMG_ALIAS[n]) : n;
 const IMG = n => IMGDATA ? IMGDATA[n] : FILE(n) + (n.startsWith("thumb-") ? ".jpg" : ".png");
 
+let mixKey = "";
 const BASE = 159000;
 const IVA = 0.21;
 
@@ -763,10 +764,11 @@ function update(){
   const pb = priceBreakdown();
   const sub = BASE + pb.adic, iva = Math.round(sub * IVA);
   document.getElementById("baseLine").textContent = fmt(BASE);
-  document.getElementById("ivaValue").textContent = fmt(iva);
-  setOdo(document.getElementById("totalValue"), fmt(sub + iva));
+  const mix = !!mixKey && configKey() === mixKey;  // "Se me ocurre otra cosa": precio infinito
+  document.getElementById("ivaValue").textContent = mix ? "∞" : fmt(iva);
+  setOdo(document.getElementById("totalValue"), mix ? "∞" : fmt(sub + iva));
   const al = document.getElementById("adicLine");
-  if (pb.adic > 0){ al.style.display = "flex"; document.getElementById("adicValue").textContent = "+" + fmt(pb.adic); } else al.style.display = "none";
+  if (pb.adic > 0){ al.style.display = "flex"; document.getElementById("adicValue").textContent = mix ? "+∞" : "+" + fmt(pb.adic); } else al.style.display = "none";
   document.getElementById("previewCaption").textContent = describeEst() + " · Esfera " + describeEsf() + " · Asiento " + describeAsi();
   applyTitleColor();
   drawPreview();
@@ -877,11 +879,10 @@ const PRESETS = [
   {label:"Color, Felpa y roble", set:() => { state.est = {opt:"Pintura laqueada", color:"Azul", finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Tapizado", opt:"Felpa", felpa:"Sunset", color:null}; }},
   {label:"Se me ocurre otra cosa", mix:true, set:() => { state.est = {opt:"Pintura laqueada", color:"Zebra", finish:"Mate"}; state.esf = {same:true, fam:"Madera", opt:"Guatambú", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }}
 ];
-let mixKey = "";
 const presetRow = document.getElementById("presetRow");
 function addPreset(p){
   const b = document.createElement("button"); b.type = "button"; b.className = "preset-btn" + (p.mix ? " mixcta" : ""); b.textContent = disp(p.label);
-  b.addEventListener("click", e => { if (e.isTrusted) pageJustOpened = false; p.set(); update(); mixKey = p.mix ? configKey() : ""; });
+  b.addEventListener("click", e => { if (e.isTrusted) pageJustOpened = false; p.set(); update(); mixKey = p.mix ? configKey() : ""; if (p.mix) update(); });
   presetRow.appendChild(b);
 }
 PRESETS.filter(p => !p.mix).forEach(addPreset);
