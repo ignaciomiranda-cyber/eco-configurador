@@ -315,7 +315,8 @@
     .summary-total .value{font-size:28px !important;}
   }
 
-  .bigInf{font-size:30px; line-height:.5; font-family:Arial,sans-serif; display:inline-block; vertical-align:middle; font-weight:400;}
+  .bigInf{font-size:44px; line-height:.5; font-family:Arial,sans-serif; display:inline-block; vertical-align:middle; font-weight:400;}
+  .preview-caption .bigInf,.summary-line .bigInf{font-size:30px;}
 </style>
 </head>
 <body>
@@ -768,8 +769,8 @@ function update(){
   document.getElementById("ivaValue").innerHTML = mix ? inf("∞") : fmt(iva);
   setOdo(document.getElementById("totalValue"), mix ? "∞" : fmt(sub + iva));
   const al = document.getElementById("adicLine");
-  if (pb.adic > 0){ al.style.display = "flex"; document.getElementById("adicValue").textContent = mix ? "+∞" : "+" + fmt(pb.adic); } else al.style.display = "none";
-  document.getElementById("previewCaption").textContent = (isMix() ? "Estructura " : "") + describeEst() + " · Esfera " + describeEsf() + " · Asiento " + describeAsi();
+  if (pb.adic > 0){ al.style.display = "flex"; document.getElementById("adicValue").innerHTML = mix ? "+" + inf("∞") : "+" + fmt(pb.adic); } else al.style.display = "none";
+  document.getElementById("previewCaption").innerHTML = (isMix() ? "Estructura " : "") + inf(describeEst()) + " · Esfera " + inf(describeEsf()) + " · Asiento " + inf(describeAsi());
   applyTitleColor();
   drawPreview();
 }
