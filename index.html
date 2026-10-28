@@ -275,6 +275,8 @@
   .fine-print.legal{margin-top:14px; padding-top:12px; border-top:1px solid rgba(35,34,38,.14);}
   .fine-print.legal p{font-size:10.5px; line-height:1.55; margin:0 0 7px; color:var(--ink-faint);}
   .fine-print.legal strong{color:var(--ink-soft);}
+  #artBg{position:fixed; inset:0; z-index:-1; pointer-events:none; background:center/cover no-repeat; opacity:0; transition:opacity .9s ease; filter:blur(2px) saturate(1.05);}
+  #artBg.on{opacity:.28;}
   .stock-pill{display:inline-block; margin:0; padding:3px 11px; border-radius:999px; background:var(--ink); color:var(--wash); font-size:11.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;}
   .preset-btn.mixcta{background:linear-gradient(90deg,#af2579,#d9480f) !important; color:#fff !important; border-color:transparent !important; font-weight:600;}
   .preset-btn.surprise{background:var(--ink) !important; color:var(--wash) !important; border-color:var(--ink) !important; font-weight:600;}
@@ -318,6 +320,7 @@
 </head>
 <body>
 
+<div id="artBg"></div>
 <div class="breadcrumb">Inicio · Mobiliario y complementos · Eco · Configurador</div>
 
 <div class="hero-title">
@@ -518,9 +521,9 @@ function normalize(){
     else if (pc.finish === "Satinado") pc.finish = "Mate";
   });
 }
-const ZEBRA = ["Zebra", "zebra"];
+const ZEBRA = ["Arte", "art"];
 function allColors(){ return LAQUEADA.concat(ESPECIALES, EPOXY_EXTRA, [ZEBRA]); }
-const cn = c => c === "Zebra" ? "zebrado blanco y negro" : c;
+const cn = c => c === "Arte" ? "ilustración incrustada" : c;
 function hexOf(list, name){ const c = colorByName(list, name); return c ? c[1] : null; }
 
 function priceBreakdown(){
@@ -534,18 +537,18 @@ function priceBreakdown(){
 function describeEst(){
   const o = estOpt();
   if (!o.paint) return o.n;
-  return o.n + " · " + cn(state.est.color) + (state.est.color === "Zebra" ? "" : " · " + state.est.finish.toLowerCase());
+  return o.n + " · " + cn(state.est.color) + (state.est.color === "Arte" ? "" : " · " + state.est.finish.toLowerCase());
 }
 function describeEsf(){
   const o = esfOpt();
-  if (o.same) return "Igual que estructura (madera laqueada · " + cn(state.est.color) + (state.est.color === "Zebra" ? "" : ", " + state.est.finish.toLowerCase()) + ")";
+  if (o.same) return "Igual que estructura (madera laqueada · " + cn(state.est.color) + (state.est.color === "Arte" ? "" : ", " + state.est.finish.toLowerCase()) + ")";
   if (!o.paint) return state.esf.fam + " " + o.n;
   return state.esf.fam + " " + o.n + " · " + state.esf.color + " · " + state.esf.finish.toLowerCase();
 }
 function describeAsi(){
   if (state.asi.fam === "Metal"){
     const o = estOpt();
-    return "Metal · igual a la estructura" + (o.paint ? " (" + o.n + " " + cn(state.est.color) + (state.est.color === "Zebra" ? "" : ", " + state.est.finish.toLowerCase()) + ")" : " (" + o.n + ")");
+    return "Metal · igual a la estructura" + (o.paint ? " (" + o.n + " " + cn(state.est.color) + (state.est.color === "Arte" ? "" : ", " + state.est.finish.toLowerCase()) + ")" : " (" + o.n + ")");
   }
   const o = asiOpt();
   if (state.asi.fam === "Madera") return "Madera " + o.n;
@@ -563,27 +566,6 @@ function loadImg(n){
   return imgCache[n];
 }
 const tintCache = {};
-// Zebrado: franjas negras onduladas, diagonales y de grosor variable sobre blanco
-let zebraCv = null;
-function zebraPattern(w, h){
-  if (zebraCv) return zebraCv;
-  const c = document.createElement("canvas"); c.width = w; c.height = h;
-  const x = c.getContext("2d");
-  x.fillStyle = "#ffffff"; x.fillRect(0, 0, w, h); x.fillStyle = "#121212";
-  for (let i = -10; i < 26; i++){
-    const top = [], bot = [];
-    for (let k = 0; k <= 56; k++){
-      const t = k / 56, y = t * h * 1.25 - 120;
-      const off = i * 84 + y * 0.5 + Math.sin(t * 8 + i * .9) * 28 + Math.sin(t * 17 + i * 2.1) * 10;
-      const th = 36 + 10 * Math.sin(t * 6 + i * 1.9) + 5 * Math.sin(t * 13 + i);
-      top.push([off - th / 2, y]); bot.push([off + th / 2, y]);
-    }
-    x.beginPath(); x.moveTo(top[0][0], top[0][1]);
-    top.forEach(p => x.lineTo(p[0], p[1])); bot.reverse().forEach(p => x.lineTo(p[0], p[1]));
-    x.closePath(); x.fill();
-  }
-  zebraCv = c; return c;
-}
 async function layer(name, hex){
   const im = await loadImg(name);
   if (!hex || hex.toLowerCase() === "#ffffff") return im;
@@ -593,7 +575,7 @@ async function layer(name, hex){
   const x = c.getContext("2d");
   x.drawImage(im, 0, 0);
   x.globalCompositeOperation = "multiply";
-  if (hex === "zebra") x.drawImage(zebraPattern(c.width, c.height), 0, 0); else { x.fillStyle = hex; x.fillRect(0, 0, c.width, c.height); }
+  if (hex === "art"){ const ai = await loadImg("arte"); x.drawImage(ai, 0, 640 - 443, 1280, 886); } else { x.fillStyle = hex; x.fillRect(0, 0, c.width, c.height); }
   x.globalCompositeOperation = "destination-in"; x.drawImage(im, 0, 0);
   tintCache[key] = c; return c;
 }
@@ -861,7 +843,11 @@ function ensureContrast(c, bg, ratio){
 // El color elegido tiñe el fondo de toda la página; los textos se ajustan para mantener buen contraste.
 function applyTitleColor(){
   let hex = (!pageJustOpened && estOpt().paint) ? hexOf(allColors(), state.est.color) : null;
-  if (hex === "zebra") hex = null;
+  const art = hex === "art";
+  if (art) hex = "#3f9a96";   // verde azulado de la ilustración
+  const bg = document.getElementById("artBg");
+  if (art && !bg.style.backgroundImage) bg.style.backgroundImage = 'url("' + IMG("arte-fondo") + '")';
+  bg.classList.toggle("on", art);
   let wash = [255, 255, 255], base = [35, 34, 38];
   if (hex){
     const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
@@ -891,7 +877,7 @@ const PRESETS = [
   {label:"Color y roble", set:() => { state.est = {opt:"Pintura laqueada", color:"Azul", finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Madera", opt:"Roble", felpa:"Sunset", color:null}; }},
   {label:"Cromo, Felpa y roble", set:() => { state.est = {opt:"Cromado", color:null, finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Tapizado", opt:"Felpa", felpa:"Sunset", color:null}; }},
   {label:"Color, Felpa y roble", set:() => { state.est = {opt:"Pintura laqueada", color:"Azul", finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Tapizado", opt:"Felpa", felpa:"Sunset", color:null}; }},
-  {label:"Se me ocurre otra cosa", mix:true, set:() => { state.est = {opt:"Pintura laqueada", color:"Zebra", finish:"Mate"}; state.esf = {same:true, fam:"Madera", opt:"Guatambú", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }}
+  {label:"Se me ocurre otra cosa", mix:true, set:() => { state.est = {opt:"Pintura laqueada", color:"Arte", finish:"Mate"}; state.esf = {same:true, fam:"Madera", opt:"Guatambú", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }}
 ];
 const presetRow = document.getElementById("presetRow");
 function addPreset(p){
