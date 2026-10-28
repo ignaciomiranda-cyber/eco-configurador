@@ -845,7 +845,7 @@ function applyTitleColor(){
 const PRESETS = [
   {label:"Full color", set:() => { state.est = {opt:"Pintura laqueada", color:"Rojo", finish:"Mate"}; state.esf = {same:true, fam:"Madera", opt:"Guatambú", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
   {label:"Tenis", set:() => { state.est = {opt:"Epoxy", color:"Terracota", finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
-  {label:"Terrazzo", set:() => { state.est = {opt:"Epoxy", color:"Blanco", finish:"Mate"}; state.esf = {fam:"Terrazzo", opt:"Iguazú", color:null, finish:"Mate"}; state.asi = {fam:"Terrazzo", opt:"Iguazú", felpa:"Sunset", color:null}; }},
+  {label:"Se me ocurre otra cosa", mix:true, set:() => { state.est = {opt:"Epoxy", color:"Verde Lima", finish:"Satinado"}; state.esf = {fam:"Madera", opt:"Pintura laqueada", color:"Violeta", finish:"Mate"}; state.asi = {fam:"Tapizado", opt:"Pana bouclé", felpa:"Sunset", color:"Naranja"}; }},
   {label:"Full crudo", set:() => { state.est = {opt:"Crudo", color:null, finish:"Mate"}; state.esf = {fam:"Metal", opt:"Crudo", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
   {label:"Full cromo", set:() => { state.est = {opt:"Cromado", color:null, finish:"Mate"}; state.esf = {fam:"Metal", opt:"Cromado", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
   {label:"Cromo y roble", set:() => { state.est = {opt:"Cromado", color:null, finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Madera", opt:"Roble", felpa:"Sunset", color:null}; }},
@@ -853,10 +853,11 @@ const PRESETS = [
   {label:"Cromo, Felpa y roble", set:() => { state.est = {opt:"Cromado", color:null, finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Tapizado", opt:"Felpa", felpa:"Sunset", color:null}; }},
   {label:"Color, Felpa y roble", set:() => { state.est = {opt:"Pintura laqueada", color:"Azul", finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Tapizado", opt:"Felpa", felpa:"Sunset", color:null}; }}
 ];
+let mixKey = "";
 const presetRow = document.getElementById("presetRow");
 PRESETS.forEach(p => {
   const b = document.createElement("button"); b.type = "button"; b.className = "preset-btn"; b.textContent = disp(p.label);
-  b.addEventListener("click", e => { if (e.isTrusted) pageJustOpened = false; p.set(); update(); });
+  b.addEventListener("click", e => { if (e.isTrusted) pageJustOpened = false; p.set(); update(); mixKey = p.mix ? configKey() : ""; });
   presetRow.appendChild(b);
 });
 {
@@ -886,9 +887,11 @@ document.getElementById("ackBox").addEventListener("change", e => {
 });
 function confirmSend(){
   if (!document.getElementById("ackBox").checked) return;
-  const msg = "Buenos días! Armé esta configuración de ECO.\nEstructura: " + describeEst() +
+  const mix = mixKey && configKey() === mixKey;
+  const msg = (mix ? "Buenos días! Se me ocurre otra cosa. Armé este mix de ECO como punto de partida.\nEstructura: " : "Buenos días! Armé esta configuración de ECO.\nEstructura: ") + describeEst() +
     "\nEsfera: " + describeEsf() + "\nAsiento: " + describeAsi() +
-    "\nTotal estimado: " + document.getElementById("totalValue").dataset.val + "\nCómo seguimos?";
+    "\nTotal estimado: " + document.getElementById("totalValue").dataset.val +
+    (mix ? "\nSigamos la conversación por acá para hacer un pedido aún más especial." : "\nCómo seguimos?");
   window.open("https://wa.me/5493518756998?text=" + encodeURIComponent(msg), "_blank");
   closeConfirm();
 }
