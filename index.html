@@ -587,9 +587,7 @@ let drawToken = 0;
 const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 async function drawPreview(){
   const token = ++drawToken;
-  const specs = pageJustOpened
-    ? [["estructura-laqueada-blanco", null], ["esfera-madera-laqueada-blanco", null], ["asiento-metal-epoxy-blanco", null]]
-    : [estLayer(), esfLayer(), asiLayer()];
+  const specs = [estLayer(), esfLayer(), asiLayer()];
   try{
     const imgs = await Promise.all([loadImg("sombra")].concat(specs.map(s => layer(s[0], s[1]))));
     if (token !== drawToken) return;
