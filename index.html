@@ -592,10 +592,10 @@ async function layer(name, hex){
     const d = mx.getImageData(0, 0, m.width, m.height), a = d.data;
     for (let k = 3; k < a.length; k += 4) a[k] = a[k] >= 140 ? 255 : 0;
     mx.putImageData(d, 0, 0);
-    const ai = await loadImg("arte-foto"), bx = 150, by = 330, bw = 990, bh = 880, kk = Math.max(bw / ai.width, bh / ai.height), w = ai.width * kk, h = ai.height * kk;
+    const ai = await loadImg("zebra-color");
     const t = document.createElement("canvas"); t.width = im.width; t.height = im.height;
     const tx = t.getContext("2d");
-    tx.drawImage(m, 0, 0); tx.globalCompositeOperation = "multiply"; tx.drawImage(ai, bx + (bw - w) / 2, by + (bh - h) * 0.3, w, h);
+    tx.drawImage(m, 0, 0); tx.globalCompositeOperation = "multiply"; tx.drawImage(ai, 0, 0, im.width, im.height);
     tx.globalCompositeOperation = "destination-in"; tx.drawImage(m, 0, 0);
     x.drawImage(im, 0, 0); x.drawImage(t, 0, 0);
     tintCache[key] = c; return c;
@@ -650,6 +650,7 @@ async function drawPreview(){
     const W = cv.width, H = cv.height, SPLIT = 400;
     x.clearRect(0, 0, W, H); sx.clearRect(0, 0, W, H);
     if (mixImg){
+      if (isMix()) x.drawImage(await loadImg("mix-sombra"), 0, 0, W, H);
       x.drawImage(mixImg, 0, 0, W, H);
       void pv.offsetWidth; pv.style.transition = "opacity .45s ease"; pv.style.opacity = "0";
       return;
