@@ -632,7 +632,39 @@ function asiLayer(){
   if (o.n === "Felpa") return ["asiento-tapizado-felpa-" + FELPAS.find(f => f.n === state.asi.felpa).f, null];
   return [o.n === "Pana bouclé" ? "asiento-tapizado-pana-boucle" : "asiento-tapizado-pana", hexOf(allColors(), state.asi.color)];  // pana teñida
 }
-let drawToken = 0;
+let drawToken = 0, mixShown = false;
+// "Se me ocurre otra cosa": la silla armada se desarma hasta quedar en la pose final del render
+async function explodeAnim(token, x, W, H, finalImg){
+  const [st, sp, se, s0, s1] = await Promise.all([
+    layer("estructura-laqueada-blanco", "art"), layer("esfera-madera-laqueada-blanco", "art"), layer("asiento-metal-epoxy-blanco", "art"),
+    loadImg("sombra"), loadImg("mix-sombra")]);
+  const t0 = performance.now(), D = 1900;
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const piece = (img, ax, ay, tx, ty, rot, sc, p, clipTop) => {
+    x.save();
+    x.translate(ax + (tx - ax) * p, ay + (ty - ay) * p); x.rotate(rot * p);
+    const k = 1 + (sc - 1) * p; x.scale(k, k); x.translate(-ax, -ay);
+    if (clipTop){ x.beginPath(); x.rect(0, 0, W, clipTop); x.clip(); }
+    x.drawImage(img, 0, 0, W, H); x.restore();
+  };
+  return new Promise(res => {
+    const frame = now => {
+      if (token !== drawToken) return res();
+      const u = Math.min(1, (now - t0) / D), p = ease(Math.min(1, u / 0.8)), fa = Math.max(0, (u - 0.8) / 0.2);
+      x.clearRect(0, 0, W, H);
+      x.globalAlpha = 1 - p; x.drawImage(s0, 0, 0, W, H);
+      x.globalAlpha = p; x.drawImage(s1, 0, 0, W, H);
+      x.globalAlpha = 1 - fa;
+      piece(st, 573, 637, 619, 670, -1.45, 0.9, p);
+      piece(se, 668, 644, 550, 1088, -0.12, 1, p);
+      piece(sp, 758, 172, 437, 1127, 0, 1, p, 400);
+      x.globalAlpha = fa; x.drawImage(finalImg, 0, 0, W, H);
+      x.globalAlpha = 1;
+      if (u < 1) requestAnimationFrame(frame); else res();
+    };
+    requestAnimationFrame(frame);
+  });
+}
 const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 async function drawPreview(){
   const token = ++drawToken;
@@ -650,11 +682,18 @@ async function drawPreview(){
     const W = cv.width, H = cv.height, SPLIT = 400;
     x.clearRect(0, 0, W, H); sx.clearRect(0, 0, W, H);
     if (mixImg){
+      const wasMix = mixShown; mixShown = isMix();
+      if (isMix() && !wasMix && !REDUCED){
+        void pv.offsetWidth; pv.style.transition = "opacity .3s ease"; pv.style.opacity = "0";
+        await explodeAnim(token, x, W, H, mixImg);
+        return;
+      }
       x.drawImage(await loadImg(isMix() ? "mix-sombra" : "sombra"), 0, 0, W, H);
       x.drawImage(mixImg, 0, 0, W, H);
       void pv.offsetWidth; pv.style.transition = "opacity .45s ease"; pv.style.opacity = "0";
       return;
     }
+    mixShown = false;
     x.drawImage(imgs[0], 0, 0, W, H); x.drawImage(imgs[1], 0, 0, W, H);
     // esfera: la parte baja (pie) queda fija en el canvas principal; la bola de arriba va en su propio canvas y se mueve
     x.save(); x.beginPath(); x.rect(0, SPLIT, W, H - SPLIT); x.clip(); x.drawImage(imgs[2], 0, 0, W, H); x.restore();
