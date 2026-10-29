@@ -365,11 +365,11 @@
     </div>
 
     <div class="summary">
-      <div class="summary-line"><span>Precio base</span><span id="baseLine"></span></div>
+      <div class="summary-line"><span>Precio base (IVA incluido)</span><span id="baseLine"></span></div>
       <div class="summary-line" id="adicLine" style="display:none;"><span>Adicionales</span><span id="adicValue">$0</span></div>
-      <div class="summary-line"><span>IVA (21%)</span><span id="ivaValue">$0</span></div>
+      <div class="summary-line" style="display:none;"><span>IVA (21%)</span><span id="ivaValue">$0</span></div>
       <div class="summary-total">
-        <span class="label">Total estimado</span>
+        <span class="label">Total estimado · IVA incluido</span>
         <span class="value" id="totalValue"></span>
       </div>
       <button class="cta" type="button" id="ctaBtn">Enviar configuración por WhatsApp</button>
@@ -792,12 +792,13 @@ function update(){
   document.getElementById("cur-asiento").innerHTML = inf(describeAsi());
   const pb = priceBreakdown();
   const sub = BASE + pb.adic, iva = Math.round(sub * IVA);
-  document.getElementById("baseLine").textContent = fmt(BASE);
+  const totP = Math.round(sub * (1 + IVA)), adicP = Math.round(pb.adic * (1 + IVA));
+  document.getElementById("baseLine").textContent = fmt(totP - adicP);
   const mix = !!mixKey && configKey() === mixKey;  // "Se me ocurre otra cosa": precio infinito
   document.getElementById("ivaValue").innerHTML = mix ? inf("∞") : fmt(iva);
   setOdo(document.getElementById("totalValue"), mix ? "∞" : fmt(sub + iva));
   const al = document.getElementById("adicLine");
-  if (pb.adic > 0){ al.style.display = "flex"; document.getElementById("adicValue").innerHTML = mix ? "+" + inf("∞") : "+" + fmt(pb.adic); } else al.style.display = "none";
+  if (pb.adic > 0){ al.style.display = "flex"; document.getElementById("adicValue").innerHTML = mix ? "+" + inf("∞") : "+" + fmt(adicP); } else al.style.display = "none";
   document.getElementById("previewCaption").innerHTML = (isMix() ? "Estructura " : "") + inf(describeEst()) + " · Esfera " + inf(describeEsf()) + " · Asiento " + inf(describeAsi());
   applyTitleColor();
   drawPreview();
