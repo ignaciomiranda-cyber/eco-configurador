@@ -633,33 +633,37 @@ function asiLayer(){
   return [o.n === "Pana bouclé" ? "asiento-tapizado-pana-boucle" : "asiento-tapizado-pana", hexOf(allColors(), state.asi.color)];  // pana teñida
 }
 let drawToken = 0, mixShown = false;
-// "Se me ocurre otra cosa": la silla armada se desarma hasta quedar en la pose final del render
-async function explodeAnim(token, x, W, H, finalImg){
+// "Se me ocurre otra cosa": la silla armada se desarma y las piezas quedan en una pose final armada con las mismas capas (sin render aparte)
+async function mixAssets(){
   const [st, sp, se, s0, s1] = await Promise.all([
     layer("estructura-laqueada-blanco", "art"), layer("esfera-madera-laqueada-blanco", "art"), layer("asiento-metal-epoxy-blanco", "art"),
     loadImg("sombra"), loadImg("mix-sombra")]);
-  const t0 = performance.now(), D = 1900;
-  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  const piece = (img, ax, ay, tx, ty, rot, sc, p, clipTop) => {
+  return {st, sp, se, s0, s1};
+}
+function drawMixPose(x, W, H, A, p){
+  const piece = (img, ax, ay, tx, ty, rot, sc, clipTop) => {
     x.save();
     x.translate(ax + (tx - ax) * p, ay + (ty - ay) * p); x.rotate(rot * p);
     const k = 1 + (sc - 1) * p; x.scale(k, k); x.translate(-ax, -ay);
     if (clipTop){ x.beginPath(); x.rect(0, 0, W, clipTop); x.clip(); }
     x.drawImage(img, 0, 0, W, H); x.restore();
   };
+  x.clearRect(0, 0, W, H);
+  x.globalAlpha = 1 - p; x.drawImage(A.s0, 0, 0, W, H);
+  x.globalAlpha = p; x.drawImage(A.s1, 0, 0, W, H);
+  x.globalAlpha = 1;
+  piece(A.st, 573, 637, 619, 670, -1.45, 0.9);
+  piece(A.se, 668, 644, 550, 1088, -0.12, 1);
+  piece(A.sp, 758, 172, 437, 1127, 0, 1, 400);
+}
+function explodeAnim(token, x, W, H, A){
+  const t0 = performance.now(), D = 2000;
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   return new Promise(res => {
     const frame = now => {
       if (token !== drawToken) return res();
-      const u = Math.min(1, (now - t0) / D), p = ease(Math.min(1, u / 0.8)), fa = Math.max(0, (u - 0.8) / 0.2);
-      x.clearRect(0, 0, W, H);
-      x.globalAlpha = 1 - p; x.drawImage(s0, 0, 0, W, H);
-      x.globalAlpha = p; x.drawImage(s1, 0, 0, W, H);
-      x.globalAlpha = 1 - fa;
-      piece(st, 573, 637, 619, 670, -1.45, 0.9, p);
-      piece(se, 668, 644, 550, 1088, -0.12, 1, p);
-      piece(sp, 758, 172, 437, 1127, 0, 1, p, 400);
-      x.globalAlpha = fa; x.drawImage(finalImg, 0, 0, W, H);
-      x.globalAlpha = 1;
+      const u = Math.min(1, (now - t0) / D);
+      drawMixPose(x, W, H, A, ease(u));
       if (u < 1) requestAnimationFrame(frame); else res();
     };
     requestAnimationFrame(frame);
@@ -670,7 +674,7 @@ async function drawPreview(){
   const token = ++drawToken;
   const specs = [estLayer(), esfLayer(), asiLayer()];
   try{
-    const mixImg = isMix() ? await layer("mix-render2", "art") : (isEllo() ? await loadImg("ello-render") : (isSuper() ? await loadImg("superyo-render") : null));
+    const mixImg = isMix() ? await mixAssets() : (isEllo() ? await loadImg("ello-render") : (isSuper() ? await loadImg("superyo-render") : null));
     const imgs = mixImg ? [] : await Promise.all([loadImg("sombra")].concat(specs.map(s => layer(s[0], s[1]))));
     if (token !== drawToken) return;
     const cv = document.getElementById("previewCanvas"), x = cv.getContext("2d");
@@ -683,12 +687,17 @@ async function drawPreview(){
     x.clearRect(0, 0, W, H); sx.clearRect(0, 0, W, H);
     if (mixImg){
       const wasMix = mixShown; mixShown = isMix();
-      if (isMix() && !wasMix && !REDUCED){
-        void pv.offsetWidth; pv.style.transition = "opacity .3s ease"; pv.style.opacity = "0";
-        await explodeAnim(token, x, W, H, mixImg);
+      if (isMix()){
+        if (!wasMix && !REDUCED){
+          void pv.offsetWidth; pv.style.transition = "opacity .3s ease"; pv.style.opacity = "0";
+          await explodeAnim(token, x, W, H, mixImg);
+          return;
+        }
+        drawMixPose(x, W, H, mixImg, 1);
+        void pv.offsetWidth; pv.style.transition = "opacity .45s ease"; pv.style.opacity = "0";
         return;
       }
-      x.drawImage(await loadImg(isMix() ? "mix-sombra" : "sombra"), 0, 0, W, H);
+      x.drawImage(await loadImg("sombra"), 0, 0, W, H);
       x.drawImage(mixImg, 0, 0, W, H);
       void pv.offsetWidth; pv.style.transition = "opacity .45s ease"; pv.style.opacity = "0";
       return;
