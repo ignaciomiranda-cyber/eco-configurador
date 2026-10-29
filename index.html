@@ -579,7 +579,7 @@ async function layer(name, hex){
   const x = c.getContext("2d");
   x.drawImage(im, 0, 0);
   x.globalCompositeOperation = "multiply";
-  if (hex === "art"){ const ai = await loadImg("patron-logo-color"); x.drawImage(ai, 0, 0, 1280, 1280); } else { x.fillStyle = hex; x.fillRect(0, 0, c.width, c.height); }
+  if (hex === "art"){ const ai = await loadImg("arte-foto"), bx = 140, by = 650, bw = 1000, bh = 540, k = Math.max(bw / ai.width, bh / ai.height), w = ai.width * k, h = ai.height * k; x.drawImage(ai, bx + (bw - w) / 2, by + (bh - h) * 0.3, w, h); } else { x.fillStyle = hex; x.fillRect(0, 0, c.width, c.height); }
   x.globalCompositeOperation = "destination-in"; x.drawImage(im, 0, 0);
   tintCache[key] = c; return c;
 }
@@ -615,7 +615,8 @@ async function drawPreview(){
   const token = ++drawToken;
   const specs = [estLayer(), esfLayer(), asiLayer()];
   try{
-    const imgs = await Promise.all([loadImg("sombra")].concat(specs.map(s => layer(s[0], s[1]))));
+    const mixImg = isMix() ? await layer("mix-render", "art") : null;
+    const imgs = mixImg ? [] : await Promise.all([loadImg("sombra")].concat(specs.map(s => layer(s[0], s[1]))));
     if (token !== drawToken) return;
     const cv = document.getElementById("previewCanvas"), x = cv.getContext("2d");
     const pv = document.getElementById("prevCanvas"), px = pv.getContext("2d");
@@ -625,6 +626,11 @@ async function drawPreview(){
     pv.style.transition = "none"; pv.style.opacity = "1";
     const W = cv.width, H = cv.height, SPLIT = 400;
     x.clearRect(0, 0, W, H); sx.clearRect(0, 0, W, H);
+    if (mixImg){
+      x.drawImage(mixImg, 0, 0, W, H);
+      void pv.offsetWidth; pv.style.transition = "opacity .45s ease"; pv.style.opacity = "0";
+      return;
+    }
     x.drawImage(imgs[0], 0, 0, W, H); x.drawImage(imgs[1], 0, 0, W, H);
     // esfera: la parte baja (pie) queda fija en el canvas principal; la bola de arriba va en su propio canvas y se mueve
     x.save(); x.beginPath(); x.rect(0, SPLIT, W, H - SPLIT); x.clip(); x.drawImage(imgs[2], 0, 0, W, H); x.restore();
