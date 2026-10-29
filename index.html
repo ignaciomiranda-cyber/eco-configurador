@@ -415,7 +415,8 @@ const IMG_ALIAS = {};
 const FILE = n => IMG_ALIAS[n] ? encodeURIComponent(IMG_ALIAS[n]) : n;
 const IMG = n => IMGDATA ? IMGDATA[n] : FILE(n) + (n.startsWith("thumb-") ? ".jpg" : ".png");
 
-let mixKey = "", elloKey = "";
+let mixKey = "", elloKey = "", superKey = "";
+const isSuper = () => !!superKey && configKey() === superKey;   // "Superyo": render dorado propio
 const isEllo = () => !!elloKey && configKey() === elloKey;   // "Ello": sin esfera, precio base
 const isMix = () => !!mixKey && configKey() === mixKey;   // "Se me ocurre otra cosa": todo queda sin definir (∞)
 const BASE = 159000;
@@ -539,6 +540,7 @@ function priceBreakdown(){
 const inf = t => t === "∞" ? '<span class="bigInf">∞</span>' : t;
 function describeEst(){
   if (isMix()) return "∞";
+  if (isSuper()) return "Metal dorado · brillante";
   if (isEllo()) return "Crudo";
   const o = estOpt();
   if (!o.paint) return o.n;
@@ -546,6 +548,7 @@ function describeEst(){
 }
 function describeEsf(){
   if (isMix()) return "∞";
+  if (isSuper()) return "Metal dorado · brillante";
   if (isEllo()) return "Sin esfera";
   const o = esfOpt();
   if (o.same) return "Igual que estructura (madera laqueada · " + cn(state.est.color) + (state.est.color === "Arte" ? "" : ", " + state.est.finish.toLowerCase()) + ")";
@@ -554,6 +557,7 @@ function describeEsf(){
 }
 function describeAsi(){
   if (isMix()) return "∞";
+  if (isSuper()) return "Metal dorado · brillante";
   if (isEllo()) return "Crudo";
   if (state.asi.fam === "Metal"){
     const o = estOpt();
@@ -635,7 +639,7 @@ async function drawPreview(){
   const token = ++drawToken;
   const specs = [estLayer(), esfLayer(), asiLayer()];
   try{
-    const mixImg = isMix() ? await layer("mix-render", "art") : (isEllo() ? await loadImg("ello-render") : null);
+    const mixImg = isMix() ? await layer("mix-render2", "art") : (isEllo() ? await loadImg("ello-render") : (isSuper() ? await loadImg("superyo-render") : null));
     const imgs = mixImg ? [] : await Promise.all([loadImg("sombra")].concat(specs.map(s => layer(s[0], s[1]))));
     if (token !== drawToken) return;
     const cv = document.getElementById("previewCanvas"), x = cv.getContext("2d");
@@ -906,13 +910,13 @@ const PRESETS = [
   {label:"Cromo, Felpa y roble", set:() => { state.est = {opt:"Cromado", color:null, finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Tapizado", opt:"Felpa", felpa:"Sunset", color:null}; }},
   {label:"Ello", ello:true, set:() => { state.est = {opt:"Crudo", color:null, finish:"Mate"}; state.esf = {fam:"Metal", opt:"Crudo", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
   {label:"Yo", set:() => { state.est = {opt:"Pintura laqueada", color:"Naranja", finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Tapizado", opt:"Felpa", felpa:"Sunset", color:null}; }},
-  {label:"Superyo", set:() => { state.est = {opt:"Pintura laqueada", color:"Oro Azteca", finish:"Brillante"}; state.esf = {same:true, fam:"Madera", opt:"Guatambú", color:null, finish:"Brillante"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
+  {label:"Superyo", superyo:true, set:() => { state.est = {opt:"Pintura laqueada", color:"Oro Azteca", finish:"Brillante"}; state.esf = {same:true, fam:"Madera", opt:"Guatambú", color:null, finish:"Brillante"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
   {label:"Se me ocurre otra cosa", mix:true, set:() => { state.est = {opt:"Pintura laqueada", color:"Arte", finish:"Mate"}; state.esf = {same:true, fam:"Madera", opt:"Guatambú", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }}
 ];
 const presetRow = document.getElementById("presetRow");
 function addPreset(p){
   const b = document.createElement("button"); b.type = "button"; b.className = "preset-btn" + (p.mix ? " mixcta" : ""); b.textContent = disp(p.label);
-  b.addEventListener("click", e => { if (e.isTrusted) pageJustOpened = false; p.set(); update(); mixKey = p.mix ? configKey() : ""; elloKey = p.ello ? configKey() : ""; if (p.mix || p.ello) update(); });
+  b.addEventListener("click", e => { if (e.isTrusted) pageJustOpened = false; p.set(); update(); mixKey = p.mix ? configKey() : ""; elloKey = p.ello ? configKey() : ""; superKey = p.superyo ? configKey() : ""; if (p.mix || p.ello || p.superyo) update(); });
   presetRow.appendChild(b);
 }
 PRESETS.filter(p => !p.mix).forEach(addPreset);
