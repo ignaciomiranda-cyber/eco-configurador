@@ -650,7 +650,7 @@ async function drawPreview(){
     const W = cv.width, H = cv.height, SPLIT = 400;
     x.clearRect(0, 0, W, H); sx.clearRect(0, 0, W, H);
     if (mixImg){
-      if (isMix()) x.drawImage(await loadImg("mix-sombra"), 0, 0, W, H);
+      x.drawImage(await loadImg(isMix() ? "mix-sombra" : "sombra"), 0, 0, W, H);
       x.drawImage(mixImg, 0, 0, W, H);
       void pv.offsetWidth; pv.style.transition = "opacity .45s ease"; pv.style.opacity = "0";
       return;
@@ -901,8 +901,10 @@ function applyTitleColor(){
 }
 
 /* ---------- presets ---------- */
+const FULL_COLORS = ["Rojo","Azul","Amarillo","Naranja","Verde","Magenta","Violeta","Celeste","Turquesa","Rosa Intenso","Verde Lima","Azul Oscuro","Salmón","Negro"];
+let fullIdx = 0;   // cada click en "Full color" pasa al siguiente color
 const PRESETS = [
-  {label:"Full color", set:() => { state.est = {opt:"Pintura laqueada", color:"Rojo", finish:"Mate"}; state.esf = {same:true, fam:"Madera", opt:"Guatambú", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
+  {label:"Full color", set:() => { state.est = {opt:"Pintura laqueada", color:FULL_COLORS[fullIdx++ % FULL_COLORS.length], finish:"Mate"}; state.esf = {same:true, fam:"Madera", opt:"Guatambú", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
   {label:"Tenis", set:() => { state.est = {opt:"Epoxy", color:"Terracota", finish:"Mate"}; state.esf = {fam:"Madera", opt:"Roble", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
   {label:"Full crudo", set:() => { state.est = {opt:"Crudo", color:null, finish:"Mate"}; state.esf = {fam:"Metal", opt:"Crudo", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
   {label:"Full cromo", set:() => { state.est = {opt:"Cromado", color:null, finish:"Mate"}; state.esf = {fam:"Metal", opt:"Cromado", color:null, finish:"Mate"}; state.asi = {fam:"Metal", opt:null, felpa:"Sunset", color:null}; }},
