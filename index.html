@@ -643,6 +643,7 @@ async function mixAssets(){
 function drawMixPose(x, W, H, A, p){
   const piece = (img, ax, ay, tx, ty, rot, sc, clipTop) => {
     x.save();
+    x.shadowColor = "rgba(0,0,0," + (0.30 * p) + ")"; x.shadowBlur = 26 * p; x.shadowOffsetY = 34 * p;   // sombra propia de cada pieza
     x.translate(ax + (tx - ax) * p, ay + (ty - ay) * p); x.rotate(rot * p);
     const k = 1 + (sc - 1) * p; x.scale(k, k); x.translate(-ax, -ay);
     if (clipTop){ x.beginPath(); x.rect(0, 0, W, clipTop); x.clip(); }
@@ -650,7 +651,6 @@ function drawMixPose(x, W, H, A, p){
   };
   x.clearRect(0, 0, W, H);
   x.globalAlpha = 1 - p; x.drawImage(A.s0, 0, 0, W, H);
-  x.globalAlpha = p; x.drawImage(A.s1, 0, 0, W, H);
   x.globalAlpha = 1;
   piece(A.st, 573, 637, 619, 670, -1.45, 0.9);
   piece(A.se, 668, 644, 550, 1088, -0.12, 1);
