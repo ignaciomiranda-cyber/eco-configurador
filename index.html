@@ -639,37 +639,46 @@ function asiLayer(){
   return [o.n === "Pana bouclé" ? "asiento-tapizado-pana-boucle" : "asiento-tapizado-pana", hexOf(allColors(), state.asi.color)];  // pana teñida
 }
 let drawToken = 0, mixShown = false;
-// "Se me ocurre otra cosa": la silla armada se desarma y las piezas quedan en una pose final armada con las mismas capas (sin render aparte)
+// "Se me ocurre otra cosa": render en reposo (con sombra) -> las piezas se separan -> render desarmado (con sombra)
+const MIX_META = {st:[41,43,1272,1158], seat:[673,210,1257,641], ball:[571,25,800,257], baton:[255,1071,855,1275], dot:[912,983,1015,1088]};
+const MIX_START = {st:[600,650,0,.98,1.1], seat:[665,640,-.10,.95,.55], ball:[775,160,0,.78,.78], baton:[580,925,0,.85,.85], dot:[665,885,0,.55,.55]};
+const MIX_ORDER = ["st","baton","dot","seat","ball"];
 async function mixAssets(){
-  const [st, sp, se, s0, s1] = await Promise.all([
-    layer("estructura-laqueada-blanco", "art"), layer("esfera-madera-laqueada-blanco", "art"), layer("asiento-metal-epoxy-blanco", "art"),
-    loadImg("sombra"), loadImg("mix-sombra")]);
-  return {st, sp, se, s0, s1};
+  const names = ["mix-1","mix-2"].concat(MIX_ORDER.map(k => "mix-" + k));
+  const imgs = await Promise.all(names.map(loadImg));
+  const A = {m1: imgs[0], m2: imgs[1]};
+  MIX_ORDER.forEach((k, i) => A[k] = imgs[i + 2]);
+  return A;
 }
-function drawMixPose(x, W, H, A, p){
-  const piece = (img, ax, ay, tx, ty, rot, sc, clipTop) => {
-    x.save();
-    x.shadowColor = "rgba(0,0,0," + (0.30 * p) + ")"; x.shadowBlur = 26 * p; x.shadowOffsetY = 34 * p;   // sombra propia de cada pieza
-    x.translate(ax + (tx - ax) * p, ay + (ty - ay) * p); x.rotate(rot * p);
-    const k = 1 + (sc - 1) * p; x.scale(k, k); x.translate(-ax, -ay);
-    if (clipTop){ x.beginPath(); x.rect(0, 0, W, clipTop); x.clip(); }
-    x.drawImage(img, 0, 0, W, H); x.restore();
-  };
+// p: avance suavizado (0..1) de las piezas; u: avance lineal para los fundidos
+function drawMixPose(x, W, H, A, p, u){
+  const f = Math.min(1, u / .15), m2 = Math.max(0, Math.min(1, (u - .82) / .18));
   x.clearRect(0, 0, W, H);
-  x.globalAlpha = 1 - p; x.drawImage(A.s0, 0, 0, W, H);
+  if (m2 > 0){ x.globalAlpha = m2; x.drawImage(A.m2, 0, 0, W, H); }
+  x.globalAlpha = 1 - f; if (f < 1) x.drawImage(A.m1, 0, 0, W, H);
+  const q = p * (1 - m2);
+  MIX_ORDER.forEach(k => {
+    const b = MIX_META[k], w = b[2] - b[0], h = b[3] - b[1], c0 = MIX_START[k];
+    const cx1 = (b[0] + b[2]) / 2, cy1 = (b[1] + b[3]) / 2;
+    const cx = c0[0] + (cx1 - c0[0]) * p, cy = c0[1] + (cy1 - c0[1]) * p;
+    x.save();
+    x.globalAlpha = k === "st" ? Math.min(1, Math.max(0, (u - .03) / .17)) : f;
+    if (q > 0){ x.shadowColor = "rgba(0,0,0," + (0.26 * q) + ")"; x.shadowBlur = 24 * q; x.shadowOffsetY = 30 * q; }
+    x.translate(cx, cy); x.rotate(c0[2] * (1 - p)); x.scale(c0[3] + (1 - c0[3]) * p, c0[4] + (1 - c0[4]) * p);
+    x.drawImage(A[k], -w / 2, -h / 2, w, h); x.restore();
+  });
   x.globalAlpha = 1;
-  piece(A.st, 573, 637, 619, 670, -1.45, 0.9);
-  piece(A.se, 668, 644, 550, 1088, -0.12, 1);
-  piece(A.sp, 758, 172, 437, 1127, 0, 1, 400);
 }
 function explodeAnim(token, x, W, H, A){
-  const t0 = performance.now(), D = 2000;
+  const D = 2200, HOLD = 450;
   const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  drawMixPose(x, W, H, A, 0, 0);
   return new Promise(res => {
+    const t0 = performance.now() + HOLD;   // primero se ve la silla en reposo
     const frame = now => {
       if (token !== drawToken) return res();
-      const u = Math.min(1, (now - t0) / D);
-      drawMixPose(x, W, H, A, ease(u));
+      const u = Math.max(0, Math.min(1, (now - t0) / D));
+      drawMixPose(x, W, H, A, ease(u), u);
       if (u < 1) requestAnimationFrame(frame); else res();
     };
     requestAnimationFrame(frame);
@@ -699,7 +708,7 @@ async function drawPreview(){
           await explodeAnim(token, x, W, H, mixImg);
           return;
         }
-        drawMixPose(x, W, H, mixImg, 1);
+        drawMixPose(x, W, H, mixImg, 1, 1);
         void pv.offsetWidth; pv.style.transition = "opacity .45s ease"; pv.style.opacity = "0";
         return;
       }
