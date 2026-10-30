@@ -319,7 +319,7 @@
   .preview-caption .bigInf,.summary-line .bigInf{font-size:30px;}
   #miniChair{display:none;}
   @media (max-width:860px){
-    #miniChair{display:block; position:fixed; right:10px; bottom:14px; width:92px; height:112px; z-index:60; opacity:0; transform:translateY(14px) scale(.9); transition:opacity .3s ease, transform .3s ease; pointer-events:none; overflow:hidden;}
+    #miniChair{display:block; position:fixed; left:10px; top:12px; width:101px; height:123px; z-index:60; opacity:0; transform:translateY(-14px) scale(.9); transition:opacity .3s ease, transform .3s ease; pointer-events:none; overflow:hidden;}
     #miniChair.show{opacity:1; transform:none;}
     #miniChair canvas{width:100%; height:100%; display:block; filter:drop-shadow(0 3px 8px rgba(0,0,0,.28));}
   }
@@ -491,8 +491,8 @@ const ASI_OPTS = {
   ]
 };
 // Asiento de metal: va soldado a la estructura, mismo acabado. Precio según el acabado de la estructura.
-const ASI_METAL_PRICE = {"Crudo":0, "Cromado":215000, "Pintura laqueada":95000, "Epoxy":0};
-const ASI_METAL_IMG = {"Crudo":"asiento-metal-crudo", "Cromado":"asiento-metal-cromado"};
+const ASI_METAL_PRICE = {"Crudo":0, "Tornasolado":215000, "Cromado":215000, "Pintura laqueada":95000, "Epoxy":0};
+const ASI_METAL_IMG = {"Crudo":"asiento-metal-crudo", "Cromado":"asiento-metal-cromado", "Tornasolado":"asiento-metal-tornasolado"};
 
 const state = {
   est: {opt:"Crudo", color:null, finish:"Mate"},
@@ -514,8 +514,6 @@ function asiOpt(){
 }
 function normalize(){
   if (state.esf.same && !estOpt().paint){ state.esf.same = false; state.esf.fam = "Madera"; state.esf.opt = "Guatambú"; }
-  // Tornasolado no tiene asiento de metal: pasar a tapizado.
-  if (state.est.opt === "Tornasolado" && state.asi.fam === "Metal"){ state.asi.fam = "Tapizado"; state.asi.opt = "Felpa"; }
   if (state.asi.fam !== "Metal" && !asiOpt()) state.asi.opt = ASI_OPTS[state.asi.fam][0].n;
   // colores por defecto cuando la opción es pintada
   const e = estOpt(); if (e.paint && !state.est.color) state.est.color = "Blanco";
@@ -805,15 +803,13 @@ function buildEsfera(){
 }
 function buildAsiento(){
   const body = document.getElementById("body-asiento"); body.innerHTML = "";
-  const noMetal = state.est.opt === "Tornasolado";
   if (estOpt().paint){
     body.appendChild(optionRow([{n:"Igual que estructura", bg:BG_LAQ}], state.asi.fam === "Metal" ? "Igual que estructura" : null, () => { state.asi.fam = "Metal"; state.asi.opt = null; }));
     body.appendChild(label("O elegir otro asiento"));
   }
   body.appendChild(toggle(["Madera", "Terrazzo", "Tapizado", "Metal"], state.asi.fam, n => {
     state.asi.fam = n; state.asi.opt = n === "Metal" ? null : ASI_OPTS[n][0].n; normalize();
-  }, noMetal ? ["Metal"] : null));
-  if (noMetal) body.appendChild(note("El asiento de metal no está disponible con estructura Tornasolado."));
+  }));
   if (state.asi.fam === "Metal"){
     const p = subPanel();
     p.appendChild(note("El asiento de metal va soldado a la estructura: siempre lleva el mismo acabado y color. Para cambiarlo, modificá la estructura."));
